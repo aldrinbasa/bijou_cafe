@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "401981513989",
+    "firebase_url": "https://bijou-cafe-c3e16-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "bijou-cafe-c3e16",
+    "storage_bucket": "bijou-cafe-c3e16.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:401981513989:android:196bf1a84ccd97968a176c",
+        "android_client_info": {
+          "package_name": "com.example.bijou_cafe"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "401981513989-6reh5rqedpdjkt9t5ncujo7omsfdtg93.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB7E0dHzJODwrC1KvfRqoXnCZUGWF4-ojk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "401981513989-6m7i07i6sthl7ssluahg4754ldtqf0u3.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
