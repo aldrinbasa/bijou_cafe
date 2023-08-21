@@ -1,7 +1,10 @@
+import 'package:bijou_cafe/constants/colors.dart';
 import 'package:flutter/material.dart';
 
 import 'package:firebase_core/firebase_core.dart';
 import '../config/firebase_options.dart';
+
+import 'package:bijou_cafe/init/login/login_view.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,12 +21,14 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Bijou Cafe',
+      home: const LoginScreen(),
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
+        primaryColor: primaryColor,
+        secondaryHeaderColor: secondaryColor,
+        textTheme: const TextTheme(
+          bodyLarge: TextStyle(color: Colors.black),
+        ),
       ),
-      home: const Text("Bijou"),
     );
   }
 }
