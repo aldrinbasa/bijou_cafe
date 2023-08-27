@@ -11,6 +11,8 @@ import 'package:bijou_cafe/utils/toast.dart';
 import 'package:bijou_cafe/init/login/login_view.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:bijou_cafe/home/home_user_screen.dart';
+
 class LoginController {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final GoogleSignIn _googleSignIn = GoogleSignIn();
@@ -21,7 +23,7 @@ class LoginController {
     saveUserDetailsToSharedPreferences(user);
 
     if (userSingleton.user?.userType == "user") {
-      // PageTransition.pushRightNavigation(context, const HomeClientScreen());
+      PageTransition.pushRightNavigation(context, const HomeUserScreen());
       Toast.show(
           context, "Login success! Welcome ${userSingleton.user?.firstName}.");
     } else if (userSingleton.user?.userType == "admin") {
