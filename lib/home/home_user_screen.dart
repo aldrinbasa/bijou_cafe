@@ -1,3 +1,5 @@
+import 'package:bijou_cafe/home/cart.dart';
+import 'package:bijou_cafe/models/order_model.dart';
 import 'package:flutter/material.dart';
 import 'package:bijou_cafe/models/category_model.dart';
 import 'package:bijou_cafe/models/product_model.dart';
@@ -19,12 +21,20 @@ class HomeUserScreenState extends State<HomeUserScreen> {
   String searchQuery = '';
   bool showCategories = false;
   String selectedCategory = '';
+  int cartItemCount = 0;
 
   @override
   void initState() {
     super.initState();
     productsFuture = firestore.getAllProducts();
     categoryFuture = firestore.getAllCategories();
+    CartSingleton().setCartUpdatedCallback(updateCartCount);
+  }
+
+  void updateCartCount(int itemCount) {
+    setState(() {
+      cartItemCount = itemCount;
+    });
   }
 
   List<ProductModel> filterProducts(List<ProductModel> products) {
@@ -105,12 +115,53 @@ class HomeUserScreenState extends State<HomeUserScreen> {
         backgroundColor: secondaryColor,
         elevation: 0,
         actions: [
-          IconButton(
-            icon: const Icon(
-              Icons.shopping_cart,
-              color: primaryColor,
-            ),
-            onPressed: () {},
+          Stack(
+            children: [
+              IconButton(
+                icon: const Icon(
+                  Icons.shopping_cart,
+                  color: primaryColor,
+                ),
+                onPressed: () async {
+                  final updatedCartCount = await showDialog<int>(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return const CartDetailsWidget();
+                    },
+                  );
+
+                  if (updatedCartCount != null) {
+                    setState(() {
+                      cartItemCount = updatedCartCount;
+                    });
+                  }
+                },
+              ),
+              if (CartSingleton().getCartItemCount() > 0)
+                Positioned(
+                  right: 5,
+                  top: 5,
+                  child: Container(
+                    padding: const EdgeInsets.all(3),
+                    decoration: BoxDecoration(
+                      color: Colors.red,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    constraints: const BoxConstraints(
+                      minWidth: 18,
+                      minHeight: 18,
+                    ),
+                    child: Text(
+                      cartItemCount.toString(),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 10,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+            ],
           ),
         ],
       ),

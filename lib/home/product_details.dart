@@ -1,3 +1,4 @@
+import 'package:bijou_cafe/models/order_model.dart';
 import 'package:flutter/material.dart';
 import 'package:bijou_cafe/models/product_model.dart';
 import 'package:bijou_cafe/constants/colors.dart';
@@ -30,6 +31,13 @@ class ProductDetailModalState extends State<ProductDetailModal> {
       addOnsTotal += widget.product.addOns[i].price * addOnQuantities[i];
     }
     return variantPrice + (addOnsTotal * numberOfOrder);
+  }
+
+  void addItemToCart(OrderModel order) {
+    setState(() {
+      CartSingleton().addToCart(order);
+      CartSingleton().onCartUpdated.call(CartSingleton().getCartItemCount());
+    });
   }
 
   @override
@@ -181,7 +189,29 @@ class ProductDetailModalState extends State<ProductDetailModal> {
                       ),
                     ),
                     ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        String notes = "";
+
+                        for (int i = 0; i < widget.product.addOns.length; i++) {
+                          if (addOnQuantities[i] > 0) {
+                            notes =
+                                "$notes ${widget.product.addOns[i].item} (x${addOnQuantities[i]})\n";
+                          }
+                        }
+
+                        OrderModel order = OrderModel(
+                            productName: widget.product.name,
+                            notes: notes.trimRight(),
+                            quantity: numberOfOrder,
+                            totalPrice: calculateTotalPrice(),
+                            variant: (selectedVariant.variant != "")
+                                ? selectedVariant.variant
+                                : "Single Order",
+                            imagePath: widget.product.imagePath);
+
+                        addItemToCart(order);
+                        Navigator.of(context).pop();
+                      },
                       style: ElevatedButton.styleFrom(
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(25.0),
