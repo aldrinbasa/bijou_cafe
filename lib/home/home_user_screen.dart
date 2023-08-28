@@ -9,10 +9,10 @@ class HomeUserScreen extends StatefulWidget {
   const HomeUserScreen({Key? key}) : super(key: key);
 
   @override
-  _HomeUserScreenState createState() => _HomeUserScreenState();
+  HomeUserScreenState createState() => HomeUserScreenState();
 }
 
-class _HomeUserScreenState extends State<HomeUserScreen> {
+class HomeUserScreenState extends State<HomeUserScreen> {
   late Future<List<ProductModel>?> productsFuture;
   late Future<List<CategoryModel>?> categoryFuture;
   FirestoreDatabase firestore = FirestoreDatabase();
@@ -50,7 +50,6 @@ class _HomeUserScreenState extends State<HomeUserScreen> {
           onTap: () {
             setState(() {
               selectedCategory = isSelected ? '' : category.name;
-              print(selectedCategory);
             });
           },
           child: Padding(
@@ -61,7 +60,7 @@ class _HomeUserScreenState extends State<HomeUserScreen> {
               labelStyle: TextStyle(
                 color: isSelected ? secondaryColor : primaryColor,
               ),
-              side: BorderSide(color: primaryColor),
+              side: const BorderSide(color: primaryColor),
             ),
           ),
         );
@@ -163,7 +162,7 @@ class _HomeUserScreenState extends State<HomeUserScreen> {
             ),
           ),
           if (showCategories)
-            Container(
+            SizedBox(
               height: 48.0, // Adjust the height as needed
               child: FutureBuilder<List<CategoryModel>?>(
                 future: categoryFuture,

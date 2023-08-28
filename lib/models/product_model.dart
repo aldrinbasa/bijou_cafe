@@ -6,14 +6,15 @@ class ProductModel {
   String imagePath;
   String name;
   List<Variant> variation;
+  List<AddOn> addOns;
 
-  ProductModel({
-    required this.category,
-    required this.description,
-    required this.imagePath,
-    required this.name,
-    required this.variation,
-  });
+  ProductModel(
+      {required this.category,
+      required this.description,
+      required this.imagePath,
+      required this.name,
+      required this.variation,
+      required this.addOns});
 }
 
 class Variant {
@@ -24,4 +25,11 @@ class Variant {
     required this.price,
     required this.variant,
   });
+}
+
+class AddOn {
+  String item;
+  double price;
+
+  AddOn({required this.item, required this.price});
 }

@@ -9,6 +9,7 @@ class FirestoreDatabase {
   final String _userCollection = 'users';
   final String _productsCollection = 'products';
   final String _categoryCollection = 'categories';
+  final String _addOnsCollection = 'addOns';
 
   Future<Map<String, dynamic>?> getUserInfoByUUID(String uid) async {
     try {
@@ -65,12 +66,36 @@ class FirestoreDatabase {
             name: categoryData['name'],
             id: int.parse(categoryData['id'].toString()));
 
+        List<AddOn> addOns = [];
+
+        if (productData['addOnsId'] != null &&
+            productData['addOnsId'].toString().isNotEmpty) {
+          final addOnsSnapshot = await _firestore
+              .collection(_addOnsCollection)
+              .where('id',
+                  isEqualTo: int.parse(productData['addOnsId'].toString()))
+              .get();
+
+          if (addOnsSnapshot.docs.isNotEmpty) {
+            final addOnsList =
+                (addOnsSnapshot.docs.first.data()['addOns'] as List<dynamic>)
+                    .map((addOn) => AddOn(
+                          item: addOn['item'],
+                          price: double.parse(addOn['price'].toString()),
+                        ))
+                    .toList();
+
+            addOns = addOnsList;
+          }
+        }
+
         ProductModel product = ProductModel(
             category: category,
             description: productData['description'].toString(),
             imagePath: productData["imagePath"].toString(),
             name: productData['name'].toString(),
-            variation: variants);
+            variation: variants,
+            addOns: addOns);
 
         products.add(product);
       }
