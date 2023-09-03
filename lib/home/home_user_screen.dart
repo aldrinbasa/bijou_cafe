@@ -1,5 +1,7 @@
 import 'package:bijou_cafe/home/cart.dart';
+import 'package:bijou_cafe/init/login/login_controller.dart';
 import 'package:bijou_cafe/models/order_model.dart';
+import 'package:bijou_cafe/models/user_model.dart';
 import 'package:flutter/material.dart';
 import 'package:bijou_cafe/models/category_model.dart';
 import 'package:bijou_cafe/models/product_model.dart';
@@ -22,6 +24,8 @@ class HomeUserScreenState extends State<HomeUserScreen> {
   bool showCategories = false;
   String selectedCategory = '';
   int cartItemCount = 0;
+
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   void initState() {
@@ -100,158 +104,281 @@ class HomeUserScreenState extends State<HomeUserScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.menu, color: primaryColor),
-          onPressed: () {},
-        ),
-        title: const Center(
-          child: Text(
-            'Cafe Bijou',
-            style: TextStyle(color: primaryColor),
-          ),
-        ),
-        backgroundColor: secondaryColor,
-        elevation: 0,
-        actions: [
-          Stack(
-            children: [
-              IconButton(
-                icon: const Icon(
-                  Icons.shopping_cart,
-                  color: primaryColor,
-                ),
-                onPressed: () async {
-                  final updatedCartCount = await showDialog<int>(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return const CartDetailsWidget();
-                    },
-                  );
-
-                  if (updatedCartCount != null) {
-                    setState(() {
-                      cartItemCount = updatedCartCount;
-                    });
-                  }
-                },
+    return WillPopScope(
+      onWillPop: () async {
+        return await showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Confirm Exit'),
+            content: const Text('Are you sure you want to exit the app?'),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text('Cancel'),
               ),
-              if (CartSingleton().getCartItemCount() > 0)
-                Positioned(
-                  right: 5,
-                  top: 5,
-                  child: Container(
-                    padding: const EdgeInsets.all(3),
-                    decoration: BoxDecoration(
-                      color: Colors.red,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    constraints: const BoxConstraints(
-                      minWidth: 18,
-                      minHeight: 18,
-                    ),
-                    child: Text(
-                      cartItemCount.toString(),
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 10,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                ),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: const Text('Exit'),
+              ),
             ],
           ),
-        ],
-      ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        );
+      },
+      child: Scaffold(
+        key: _scaffoldKey,
+        drawer: ClientDrawer(),
+        appBar: AppBar(
+          leading: IconButton(
+            icon: const Icon(Icons.menu, color: primaryColor),
+            onPressed: () {
+              _scaffoldKey.currentState?.openDrawer();
+            },
+          ),
+          title: const Center(
+            child: Text(
+              'Cafe Bijou',
+              style: TextStyle(color: primaryColor),
+            ),
+          ),
+          backgroundColor: secondaryColor,
+          elevation: 0,
+          actions: [
+            Stack(
               children: [
-                Expanded(
-                  flex: 8,
-                  child: TextField(
-                    onChanged: (value) {
+                IconButton(
+                  icon: const Icon(
+                    Icons.shopping_cart,
+                    color: primaryColor,
+                  ),
+                  onPressed: () async {
+                    final updatedCartCount = await showDialog<int>(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return const CartDetailsWidget();
+                      },
+                    );
+
+                    if (updatedCartCount != null) {
                       setState(() {
-                        searchQuery = value;
+                        cartItemCount = updatedCartCount;
                       });
-                    },
-                    decoration: InputDecoration(
-                      hintText: 'Find what you\'re craving for',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(20.0),
+                    }
+                  },
+                ),
+                if (CartSingleton().getCartItemCount() > 0)
+                  Positioned(
+                    right: 5,
+                    top: 5,
+                    child: Container(
+                      padding: const EdgeInsets.all(3),
+                      decoration: BoxDecoration(
+                        color: Colors.red,
+                        borderRadius: BorderRadius.circular(10),
                       ),
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: const BorderSide(color: primaryColor),
-                        borderRadius: BorderRadius.circular(20.0),
+                      constraints: const BoxConstraints(
+                        minWidth: 18,
+                        minHeight: 18,
                       ),
-                      contentPadding: const EdgeInsets.all(.0),
-                      prefixIcon: const Icon(
-                        Icons.search_rounded,
-                        color: primaryColor,
+                      child: Text(
+                        cartItemCount.toString(),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                        ),
+                        textAlign: TextAlign.center,
                       ),
                     ),
                   ),
-                ),
-                Expanded(
-                  flex: 1,
-                  child: IconButton(
-                    icon: const Icon(Icons.filter_list),
-                    onPressed: () {
-                      setState(() {
-                        showCategories = !showCategories;
-                      });
-                    },
-                  ),
-                ),
               ],
             ),
-          ),
-          if (showCategories)
-            SizedBox(
-              height: 48.0, // Adjust the height as needed
-              child: FutureBuilder<List<CategoryModel>?>(
-                future: categoryFuture,
+          ],
+        ),
+        body: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    flex: 8,
+                    child: TextField(
+                      onChanged: (value) {
+                        setState(() {
+                          searchQuery = value;
+                        });
+                      },
+                      decoration: InputDecoration(
+                        hintText: 'Find what you\'re craving for',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(20.0),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: const BorderSide(color: primaryColor),
+                          borderRadius: BorderRadius.circular(20.0),
+                        ),
+                        contentPadding: const EdgeInsets.all(.0),
+                        prefixIcon: const Icon(
+                          Icons.search_rounded,
+                          color: primaryColor,
+                        ),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 1,
+                    child: IconButton(
+                      icon: const Icon(Icons.filter_list),
+                      onPressed: () {
+                        setState(() {
+                          showCategories = !showCategories;
+                        });
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (showCategories)
+              SizedBox(
+                height: 48.0, // Adjust the height as needed
+                child: FutureBuilder<List<CategoryModel>?>(
+                  future: categoryFuture,
+                  builder: (context, snapshot) {
+                    if (snapshot.hasError || !snapshot.hasData) {
+                      return const Center(
+                        child: Text('Error loading categories'),
+                      );
+                    } else {
+                      return buildCategoryChips(snapshot.data!);
+                    }
+                  },
+                ),
+              )
+            else
+              const SizedBox(width: 1), // Use width instead of height
+            Expanded(
+              flex: 10,
+              child: FutureBuilder<List<ProductModel>?>(
+                future: productsFuture,
                 builder: (context, snapshot) {
-                  if (snapshot.hasError || !snapshot.hasData) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(
-                      child: Text('Error loading categories'),
+                      child: CircularProgressIndicator(),
+                    );
+                  } else if (snapshot.hasError || !snapshot.hasData) {
+                    return const Center(
+                      child: Text('Error loading products'),
                     );
                   } else {
-                    return buildCategoryChips(snapshot.data!);
+                    final filteredProducts = filterProducts(snapshot.data!);
+                    return buildProductGrid(filteredProducts);
                   }
                 },
               ),
-            )
-          else
-            const SizedBox(width: 1), // Use width instead of height
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class ClientDrawer extends StatelessWidget {
+  final UserModel? loggedInUser = UserSingleton().user;
+  final LoginController loginController = LoginController();
+
+  ClientDrawer({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Drawer(
+      child: Column(
+        children: <Widget>[
+          Container(
+            height: 120,
+            decoration: const BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('assets/cafe_background.jpg'),
+                fit: BoxFit.cover,
+              ),
+            ),
+            child: Center(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    "${loggedInUser!.firstName} ${loggedInUser!.lastName}",
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                  Text(
+                    loggedInUser!.email,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
           Expanded(
-            flex: 10,
-            child: FutureBuilder<List<ProductModel>?>(
-              future: productsFuture,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(
-                    child: CircularProgressIndicator(),
-                  );
-                } else if (snapshot.hasError || !snapshot.hasData) {
-                  return const Center(
-                    child: Text('Error loading products'),
-                  );
-                } else {
-                  final filteredProducts = filterProducts(snapshot.data!);
-                  return buildProductGrid(filteredProducts);
-                }
-              },
+            child: Container(
+              color: secondaryColor,
+              child: ListView(
+                padding: EdgeInsets.zero,
+                children: [
+                  ListTile(
+                    leading: const Icon(Icons.logout),
+                    title: const Text("Logout"),
+                    onTap: () {
+                      Navigator.of(context).pop();
+                      _showLogoutConfirmationDialog(context);
+                    },
+                  ),
+                ],
+              ),
             ),
           ),
         ],
       ),
     );
+  }
+
+  void _showLogoutConfirmationDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Logout'),
+          content: const Text('Are you sure you want to logout?'),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('Logout'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                _logout(context);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _logout(BuildContext context) {
+    loginController.logout(context);
   }
 }
