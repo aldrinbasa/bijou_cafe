@@ -1,4 +1,6 @@
 import 'package:bijou_cafe/models/category_model.dart';
+import 'package:bijou_cafe/models/online_order_model.dart';
+import 'package:bijou_cafe/models/order_model.dart';
 import 'package:bijou_cafe/models/product_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:bijou_cafe/models/user_model.dart';
@@ -10,6 +12,7 @@ class FirestoreDatabase {
   final String _productsCollection = 'products';
   final String _categoryCollection = 'categories';
   final String _addOnsCollection = 'addOns';
+  final String _ordersCollection = 'orders';
 
   Future<Map<String, dynamic>?> getUserInfoByUUID(String uid) async {
     try {
@@ -32,6 +35,17 @@ class FirestoreDatabase {
           FirebaseFirestore.instance.collection(_userCollection);
 
       await usersCollection.doc(newUser.uid).set(newUser.toMap());
+    } catch (e) {
+      return;
+    }
+  }
+
+  Future<void> createOrder(OnlineOrderModel onlineOrder) async {
+    try {
+      CollectionReference orderCollection =
+          FirebaseFirestore.instance.collection(_ordersCollection);
+
+      await orderCollection.doc().set(onlineOrder.toMap());
     } catch (e) {
       return;
     }
@@ -123,6 +137,58 @@ class FirestoreDatabase {
       }
 
       return categories;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  Future<List<OnlineOrderModel>?> getAllOrder(String uid) async {
+    try {
+      List<OnlineOrderModel> orders = [];
+
+      final snapshot = await _firestore
+          .collection(_ordersCollection)
+          .where('userID', isEqualTo: uid)
+          .get();
+
+      for (var doc in snapshot.docs) {
+        final orderData = doc.data();
+        final orderId = doc.id;
+
+        List<OrderModel> items = [];
+        List<dynamic> ordersData = orderData['items'];
+
+        for (var orderData in ordersData) {
+          OrderModel item = OrderModel(
+              productName: orderData['productName'].toString(),
+              notes: orderData['notes'],
+              quantity: int.parse(orderData['quantity'].toString()),
+              totalPrice: double.parse(orderData['totalPrice'].toString()),
+              variant: orderData['variant'],
+              imagePath: '');
+
+          items.add(item);
+        }
+
+        PaymentModel payment = PaymentModel(
+            paymentMethod: orderData['payment']['method'],
+            status: orderData['payment']['status']);
+
+        OnlineOrderModel order = OnlineOrderModel(
+            address: orderData['address'],
+            deliveryCharge:
+                double.parse(orderData['deliveryCharge'].toString()),
+            orders: items,
+            payment: payment,
+            phoneNumber: orderData['phoneNumber'],
+            status: orderData['status'],
+            userID: orderData['userID'],
+            orderId: orderId);
+
+        orders.add(order);
+      }
+
+      return orders;
     } catch (e) {
       return null;
     }

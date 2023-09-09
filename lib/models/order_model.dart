@@ -13,6 +13,16 @@ class OrderModel {
       required this.totalPrice,
       required this.variant,
       required this.imagePath});
+
+  Map<String, dynamic> toMap() {
+    return {
+      'productName': productName,
+      'variant': variant,
+      'notes': notes,
+      'quantity': quantity,
+      'totalPrice': totalPrice,
+    };
+  }
 }
 
 class CartSingleton {

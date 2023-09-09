@@ -1,4 +1,5 @@
 import 'package:bijou_cafe/home/cart.dart';
+import 'package:bijou_cafe/home/user_orders.dart';
 import 'package:bijou_cafe/init/login/login_controller.dart';
 import 'package:bijou_cafe/models/order_model.dart';
 import 'package:bijou_cafe/models/user_model.dart';
@@ -334,6 +335,19 @@ class ClientDrawer extends StatelessWidget {
               child: ListView(
                 padding: EdgeInsets.zero,
                 children: [
+                  ListTile(
+                    leading: const Icon(Icons.book),
+                    title: const Text("Orders"),
+                    onTap: () async {
+                      Navigator.pop(context);
+                      await showDialog<int>(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return const UserOrders();
+                        },
+                      );
+                    },
+                  ),
                   ListTile(
                     leading: const Icon(Icons.logout),
                     title: const Text("Logout"),
