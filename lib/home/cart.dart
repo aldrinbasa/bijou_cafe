@@ -46,7 +46,8 @@ class CartDetailsWidgetState extends State<CartDetailsWidget> {
             phoneNumber: phoneNumber.text,
             status: 'pending',
             userID: loggedInUser!.uid,
-            orderId: '');
+            orderId: '',
+            dateOrdered: DateTime.now());
 
         firestoreDatabase.createOrder(onlineOrder);
 

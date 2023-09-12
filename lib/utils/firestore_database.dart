@@ -146,10 +146,16 @@ class FirestoreDatabase {
     try {
       List<OnlineOrderModel> orders = [];
 
-      final snapshot = await _firestore
-          .collection(_ordersCollection)
-          .where('userID', isEqualTo: uid)
-          .get();
+      final snapshot = (uid != '')
+          ? await _firestore
+              .collection(_ordersCollection)
+              .where('userID', isEqualTo: uid)
+              .orderBy('dateOrdered', descending: true)
+              .get()
+          : await _firestore
+              .collection(_ordersCollection)
+              .orderBy('dateOrdered', descending: true)
+              .get();
 
       for (var doc in snapshot.docs) {
         final orderData = doc.data();
@@ -183,7 +189,8 @@ class FirestoreDatabase {
             phoneNumber: orderData['phoneNumber'],
             status: orderData['status'],
             userID: orderData['userID'],
-            orderId: orderId);
+            orderId: orderId,
+            dateOrdered: orderData['dateOrdered'].toDate());
 
         orders.add(order);
       }

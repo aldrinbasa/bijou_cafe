@@ -20,12 +20,11 @@ class OnlineOrderModel {
       required this.phoneNumber,
       required this.status,
       required this.userID,
-      required this.orderId}) {
+      required this.orderId,
+      required this.dateOrdered}) {
     for (int i = 0; i < orders.length; i++) {
       totalPrice = totalPrice + orders[i].totalPrice;
     }
-
-    dateOrdered = DateTime.now();
   }
 
   Map<String, dynamic> toMap() {

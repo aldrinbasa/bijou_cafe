@@ -1,5 +1,6 @@
 // ignore_for_file: use_build_context_synchronously
 
+import 'package:bijou_cafe/home/home_admin.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -27,7 +28,7 @@ class LoginController {
       Toast.show(
           context, "Login success! Welcome ${userSingleton.user?.firstName}.");
     } else if (userSingleton.user?.userType == "admin") {
-      // PageTransition.pushRightNavigation(context, const AdminHomeScreen());
+      PageTransition.pushRightNavigation(context, const HomeAdminScreen());
       Toast.show(context,
           "Admin login success! Welcome ${userSingleton.user?.firstName}.");
     } else {

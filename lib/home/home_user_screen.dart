@@ -343,7 +343,11 @@ class ClientDrawer extends StatelessWidget {
                       await showDialog<int>(
                         context: context,
                         builder: (BuildContext context) {
-                          return const UserOrders();
+                          if (loggedInUser!.userType == 'admin') {
+                            return const Text("data");
+                          } else {
+                            return const UserOrders();
+                          }
                         },
                       );
                     },
