@@ -102,7 +102,7 @@ class _HomeAdminScreenState extends State<HomeAdminScreen> {
 class CustomOrderCard extends StatelessWidget {
   final OnlineOrderModel order;
 
-  const CustomOrderCard({super.key, required this.order});
+  const CustomOrderCard({Key? key, required this.order}) : super(key: key);
 
   Color _getStatusColor(String status) {
     switch (status.toLowerCase()) {
@@ -113,6 +113,8 @@ class CustomOrderCard extends StatelessWidget {
       case 'for delivery':
         return Colors.yellow;
       case 'completed':
+        return Colors.green;
+      case 'paid':
         return Colors.green;
       default:
         return Colors.black;
@@ -125,8 +127,8 @@ class CustomOrderCard extends StatelessWidget {
 
   String _formatPrice(double price) {
     final currencyFormatter = NumberFormat.currency(
-      symbol: '₱', // Philippine Peso symbol
-      decimalDigits: 2, // 2 decimal places
+      symbol: '₱',
+      decimalDigits: 2,
     );
     return currencyFormatter.format(price);
   }
@@ -136,8 +138,8 @@ class CustomOrderCard extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.grey[900], // Set the background color
-        borderRadius: BorderRadius.circular(16), // Add circular edge
+        color: Colors.black,
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
             color: Colors.grey.withOpacity(0.5),
@@ -148,7 +150,7 @@ class CustomOrderCard extends StatelessWidget {
         ],
       ),
       child: Padding(
-        padding: const EdgeInsets.all(16.0), // Adjust padding
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -156,7 +158,6 @@ class CustomOrderCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Expanded(
-                  // Wrap the Text widget in Expanded
                   child: Text(
                     'Order ID: ${order.orderId}',
                     style: const TextStyle(
@@ -166,21 +167,11 @@ class CustomOrderCard extends StatelessWidget {
                     ),
                   ),
                 ),
-                Chip(
-                  label: Text(
-                    order.status,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  backgroundColor: _getStatusColor(order.status),
-                ),
               ],
             ),
-            const SizedBox(height: 8), // Adjust spacing
+            const SizedBox(height: 8),
             const Divider(color: Colors.white),
-            const SizedBox(height: 8), // Adjust spacing
+            const SizedBox(height: 8),
             const Text(
               'Address:',
               style: TextStyle(fontSize: 16, color: Colors.white),
@@ -189,7 +180,7 @@ class CustomOrderCard extends StatelessWidget {
               order.address,
               style: const TextStyle(fontSize: 18, color: Colors.white),
             ),
-            const SizedBox(height: 16), // Adjust spacing
+            const SizedBox(height: 16),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -201,8 +192,11 @@ class CustomOrderCard extends StatelessWidget {
                       style: TextStyle(fontSize: 16, color: Colors.white),
                     ),
                     Text(
-                      _formatPrice(order.totalPrice), // Format to PHP
-                      style: const TextStyle(fontSize: 20, color: Colors.white),
+                      _formatPrice(order.totalPrice),
+                      style: const TextStyle(
+                        fontSize: 20,
+                        color: Colors.white,
+                      ),
                     ),
                   ],
                 ),
@@ -214,20 +208,77 @@ class CustomOrderCard extends StatelessWidget {
                       style: TextStyle(fontSize: 16, color: Colors.white),
                     ),
                     Text(
-                      _formatDate(order.dateOrdered), // Format the date
-                      style: const TextStyle(fontSize: 20, color: Colors.white),
+                      _formatDate(order.dateOrdered),
+                      style: const TextStyle(
+                        fontSize: 20,
+                        color: Colors.white,
+                      ),
                     ),
                   ],
                 ),
               ],
             ),
-            const SizedBox(height: 16), // Adjust spacing
+            const SizedBox(height: 16),
+            const Divider(color: Colors.white),
+            Row(
+              children: [
+                const Text(
+                  'Payment:',
+                  style: TextStyle(fontSize: 16, color: Colors.white),
+                ),
+                const SizedBox(
+                  width: 20,
+                ),
+                Text(
+                  order.payment.paymentMethod,
+                  style: const TextStyle(
+                    fontSize: 20,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Delivery Charge:',
+                      style: TextStyle(fontSize: 16, color: Colors.white),
+                    ),
+                    Text(
+                      _formatPrice(order.deliveryCharge),
+                      style: const TextStyle(
+                        fontSize: 20,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
+                ),
+                Align(
+                  alignment: Alignment.bottomRight,
+                  child: Chip(
+                    label: Text(
+                      order.payment.status.toUpperCase(),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    backgroundColor: _getStatusColor(order.payment.status),
+                  ),
+                ),
+              ],
+            ),
+            const Divider(color: Colors.white),
             Align(
-              alignment:
-                  Alignment.bottomRight, // Align the status to the bottom right
+              alignment: Alignment.center,
               child: Chip(
+                elevation: 2,
                 label: Text(
-                  order.status,
+                  "Order Status: ${order.status.toUpperCase()}",
                   style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
