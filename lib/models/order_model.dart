@@ -21,6 +21,7 @@ class OrderModel {
       'notes': notes,
       'quantity': quantity,
       'totalPrice': totalPrice,
+      'imagePath': imagePath
     };
   }
 }

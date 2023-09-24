@@ -1,4 +1,5 @@
 import 'package:bijou_cafe/constants/colors.dart';
+import 'package:bijou_cafe/home/admin_order_details.dart';
 import 'package:bijou_cafe/home/home_user_screen.dart';
 import 'package:bijou_cafe/models/online_order_model.dart';
 import 'package:bijou_cafe/models/user_model.dart';
@@ -90,7 +91,14 @@ class _HomeAdminScreenState extends State<HomeAdminScreen> {
           child: ListView.builder(
             itemCount: orders.length,
             itemBuilder: (context, index) {
-              return CustomOrderCard(order: orders[index]);
+              return CustomOrderCard(
+                order: orders[index],
+                onRefreshedOrders: (refreshedOrders) {
+                  setState(() {
+                    orders = refreshedOrders;
+                  });
+                },
+              );
             },
           ),
         ),
@@ -101,8 +109,10 @@ class _HomeAdminScreenState extends State<HomeAdminScreen> {
 
 class CustomOrderCard extends StatelessWidget {
   final OnlineOrderModel order;
+  final Function(List<OnlineOrderModel>) onRefreshedOrders;
 
-  const CustomOrderCard({Key? key, required this.order}) : super(key: key);
+  const CustomOrderCard(
+      {super.key, required this.order, required this.onRefreshedOrders});
 
   Color _getStatusColor(String status) {
     switch (status.toLowerCase()) {
@@ -133,161 +143,182 @@ class CustomOrderCard extends StatelessWidget {
     return currencyFormatter.format(price);
   }
 
+  void _refreshData() async {
+    List<OnlineOrderModel>? refreshedOrders =
+        await FirestoreDatabase().getAllOrder('');
+
+    if (refreshedOrders != null) {
+      onRefreshedOrders(refreshedOrders);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.black,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.5),
-            spreadRadius: 4,
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Text(
-                    'Order ID: ${order.orderId}',
+    return GestureDetector(
+      onTap: () {
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AdminOrderDetails(order: order);
+          },
+        ).then((value) {
+          _refreshData();
+        });
+      },
+      child: Container(
+        margin: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.black,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.5),
+              spreadRadius: 4,
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                      'Order ID: ${order.orderId}',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              const Divider(color: Colors.white),
+              const SizedBox(height: 8),
+              const Text(
+                'Address:',
+                style: TextStyle(fontSize: 16, color: Colors.white),
+              ),
+              Text(
+                order.address,
+                style: const TextStyle(fontSize: 18, color: Colors.white),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Total Price:',
+                        style: TextStyle(fontSize: 16, color: Colors.white),
+                      ),
+                      Text(
+                        _formatPrice(order.totalPrice),
+                        style: const TextStyle(
+                          fontSize: 20,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Date Ordered:',
+                        style: TextStyle(fontSize: 16, color: Colors.white),
+                      ),
+                      Text(
+                        _formatDate(order.dateOrdered),
+                        style: const TextStyle(
+                          fontSize: 20,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              const Divider(color: Colors.white),
+              Row(
+                children: [
+                  const Text(
+                    'Payment:',
+                    style: TextStyle(fontSize: 16, color: Colors.white),
+                  ),
+                  const SizedBox(
+                    width: 20,
+                  ),
+                  Text(
+                    order.payment.paymentMethod,
                     style: const TextStyle(
-                      fontWeight: FontWeight.bold,
                       fontSize: 20,
                       color: Colors.white,
                     ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            const Divider(color: Colors.white),
-            const SizedBox(height: 8),
-            const Text(
-              'Address:',
-              style: TextStyle(fontSize: 16, color: Colors.white),
-            ),
-            Text(
-              order.address,
-              style: const TextStyle(fontSize: 18, color: Colors.white),
-            ),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Total Price:',
-                      style: TextStyle(fontSize: 16, color: Colors.white),
-                    ),
-                    Text(
-                      _formatPrice(order.totalPrice),
-                      style: const TextStyle(
-                        fontSize: 20,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ],
-                ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Date Ordered:',
-                      style: TextStyle(fontSize: 16, color: Colors.white),
-                    ),
-                    Text(
-                      _formatDate(order.dateOrdered),
-                      style: const TextStyle(
-                        fontSize: 20,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            const Divider(color: Colors.white),
-            Row(
-              children: [
-                const Text(
-                  'Payment:',
-                  style: TextStyle(fontSize: 16, color: Colors.white),
-                ),
-                const SizedBox(
-                  width: 20,
-                ),
-                Text(
-                  order.payment.paymentMethod,
-                  style: const TextStyle(
-                    fontSize: 20,
-                    color: Colors.white,
-                  ),
-                ),
-              ],
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Delivery Charge:',
-                      style: TextStyle(fontSize: 16, color: Colors.white),
-                    ),
-                    Text(
-                      _formatPrice(order.deliveryCharge),
-                      style: const TextStyle(
-                        fontSize: 20,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ],
-                ),
-                Align(
-                  alignment: Alignment.bottomRight,
-                  child: Chip(
-                    label: Text(
-                      order.payment.status.toUpperCase(),
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    backgroundColor: _getStatusColor(order.payment.status),
-                  ),
-                ),
-              ],
-            ),
-            const Divider(color: Colors.white),
-            Align(
-              alignment: Alignment.center,
-              child: Chip(
-                elevation: 2,
-                label: Text(
-                  "Order Status: ${order.status.toUpperCase()}",
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                backgroundColor: _getStatusColor(order.status),
+                ],
               ),
-            ),
-          ],
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Delivery Charge:',
+                        style: TextStyle(fontSize: 16, color: Colors.white),
+                      ),
+                      Text(
+                        _formatPrice(order.deliveryCharge),
+                        style: const TextStyle(
+                          fontSize: 20,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                  Align(
+                    alignment: Alignment.bottomRight,
+                    child: Chip(
+                      label: Text(
+                        order.payment.status.toUpperCase(),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      backgroundColor: _getStatusColor(order.payment.status),
+                    ),
+                  ),
+                ],
+              ),
+              const Divider(color: Colors.white),
+              Align(
+                alignment: Alignment.center,
+                child: Chip(
+                  elevation: 2,
+                  label: Text(
+                    "Order Status: ${order.status.toUpperCase()}",
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  backgroundColor: _getStatusColor(order.status),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

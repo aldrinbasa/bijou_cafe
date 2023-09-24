@@ -142,6 +142,19 @@ class FirestoreDatabase {
     }
   }
 
+  Future<void> updateOrder(OnlineOrderModel newOrderData) async {
+    try {
+      CollectionReference orderCollection =
+          FirebaseFirestore.instance.collection(_ordersCollection);
+
+      await orderCollection
+          .doc(newOrderData.orderId)
+          .update(newOrderData.toMap());
+    } catch (e) {
+      return;
+    }
+  }
+
   Future<List<OnlineOrderModel>?> getAllOrder(String uid) async {
     try {
       List<OnlineOrderModel> orders = [];
@@ -171,7 +184,7 @@ class FirestoreDatabase {
               quantity: int.parse(orderData['quantity'].toString()),
               totalPrice: double.parse(orderData['totalPrice'].toString()),
               variant: orderData['variant'],
-              imagePath: '');
+              imagePath: orderData['imagePath'].toString());
 
           items.add(item);
         }
