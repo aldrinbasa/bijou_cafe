@@ -20,9 +20,8 @@ class _AdminOrderDetailsState extends State<AdminOrderDetails> {
       firestore.updateOrder(widget.order);
 
       Navigator.of(context).pop();
-    } catch (e) {
-      print("Error updating order: $e");
-    }
+      // ignore: empty_catches
+    } catch (e) {}
   }
 
   Color _getStatusColor(String status) {

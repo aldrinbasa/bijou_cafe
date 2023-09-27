@@ -8,9 +8,9 @@ import 'package:bijou_cafe/constants/sizes.dart';
 import 'package:bijou_cafe/constants/texts.dart';
 
 class LoginFooter extends StatefulWidget {
-  const LoginFooter({
-    super.key,
-  });
+  final Function(bool) setSignUpVisible;
+
+  const LoginFooter({super.key, required this.setSignUpVisible});
 
   @override
   State<LoginFooter> createState() => _LoginFooterState();
@@ -60,7 +60,7 @@ class _LoginFooterState extends State<LoginFooter> {
         ),
         TextButton(
           onPressed: () {
-            // PageTransition.pushUpNavigation(context, const SignUpScreen());
+            widget.setSignUpVisible(true);
           },
           child: Text.rich(
             TextSpan(

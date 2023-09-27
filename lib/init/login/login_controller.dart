@@ -50,17 +50,23 @@ class LoginController {
       User? user = userCredential.user;
 
       if (user != null) {
-        final userInfo = await firestoreDatabase.getUserInfoByUUID(user.uid);
+        if (!user.emailVerified) {
+          user.sendEmailVerification();
+          Toast.show(context,
+              "User ${user.email} is not yet verified. We've sent a verification email.");
+        } else {
+          final userInfo = await firestoreDatabase.getUserInfoByUUID(user.uid);
 
-        UserModel loggedInUser = UserModel(
-          uid: user.uid,
-          email: user.email!,
-          firstName: userInfo!['firstName'],
-          lastName: userInfo['lastName'],
-          userType: userInfo['userType'],
-        );
+          UserModel loggedInUser = UserModel(
+            uid: user.uid,
+            email: user.email!,
+            firstName: userInfo!['firstName'],
+            lastName: userInfo['lastName'],
+            userType: userInfo['userType'],
+          );
 
-        setUser(loggedInUser, context);
+          setUser(loggedInUser, context);
+        }
       }
     } catch (error) {
       if (error is FirebaseAuthException) {
@@ -83,6 +89,8 @@ class LoginController {
       User? user = userCredential.user;
 
       if (user != null) {
+        await user.sendEmailVerification();
+
         UserModel newUser = UserModel(
             uid: user.uid,
             email: email,
@@ -146,12 +154,24 @@ class LoginController {
     PageTransition.pushRightNavigation(context, const LoginScreen());
   }
 
+  Future<void> sendPasswordResetEmail(
+      BuildContext context, String email) async {
+    try {
+      await _auth.sendPasswordResetEmail(
+        email: email,
+      );
+    } catch (error) {
+      Toast.show(context, error.toString());
+    }
+  }
+
   void clearUserDetailsFromSharedPreferences() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.remove('user_email');
     prefs.remove('user_first_name');
     prefs.remove('user_last_name');
     prefs.remove('user_type');
+    prefs.remove('user_uid');
   }
 
   void saveUserDetailsToSharedPreferences(UserModel user) async {
