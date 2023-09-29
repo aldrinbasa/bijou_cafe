@@ -1,4 +1,5 @@
 import 'package:bijou_cafe/home/cart.dart';
+import 'package:bijou_cafe/home/manage_categories.dart';
 import 'package:bijou_cafe/home/user_orders.dart';
 import 'package:bijou_cafe/init/login/login_controller.dart';
 import 'package:bijou_cafe/models/order_model.dart';
@@ -352,6 +353,28 @@ class ClientDrawer extends StatelessWidget {
                       );
                     },
                   ),
+                  (loggedInUser!.userType == 'admin')
+                      ? ListTile(
+                          leading: const Icon(Icons.category),
+                          title: const Text('Categories'),
+                          onTap: () {
+                            Navigator.of(context).pop();
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return const ManageCategories();
+                              },
+                            );
+                          },
+                        )
+                      : const SizedBox(height: 0),
+                  (loggedInUser!.userType == 'admin')
+                      ? ListTile(
+                          leading: const Icon(Icons.food_bank),
+                          title: const Text('Products'),
+                          onTap: () {},
+                        )
+                      : const SizedBox(height: 0),
                   ListTile(
                     leading: const Icon(Icons.logout),
                     title: const Text("Logout"),

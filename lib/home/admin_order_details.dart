@@ -330,7 +330,7 @@ class DeliveryChargeDialogState extends State<DeliveryChargeDialog> {
 
       Navigator.of(context).pop();
     } catch (e) {
-      print("Error updating order: $e");
+      return;
     }
   }
 

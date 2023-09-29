@@ -1,6 +1,10 @@
 class CategoryModel {
   String name;
-  int id;
+  String id;
 
   CategoryModel({required this.name, required this.id});
+
+  Map<String, dynamic> toMap() {
+    return {'id': id, 'name': name};
+  }
 }

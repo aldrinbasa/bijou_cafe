@@ -51,6 +51,31 @@ class FirestoreDatabase {
     }
   }
 
+  Future<int>? getProductCountByCategory(String category) async {
+    try {
+      int count = 0;
+      final snapshot = await _firestore
+          .collection(_productsCollection)
+          .where('categoryId', isEqualTo: category)
+          .get();
+      count = snapshot.docs.length;
+      return count;
+    } catch (e) {
+      return 0;
+    }
+  }
+
+  Future<void> updateCategoryName(CategoryModel newCategory) async {
+    try {
+      CollectionReference categoryCollection =
+          FirebaseFirestore.instance.collection(_categoryCollection);
+
+      await categoryCollection.doc(newCategory.id).update(newCategory.toMap());
+    } catch (e) {
+      return;
+    }
+  }
+
   Future<List<ProductModel>?> getAllProducts() async {
     try {
       List<ProductModel> products = [];
@@ -72,13 +97,11 @@ class FirestoreDatabase {
 
         final categorySnapshot = await _firestore
             .collection(_categoryCollection)
-            .where('id',
-                isEqualTo: int.parse(productData['categoryId'].toString()))
+            .where('id', isEqualTo: productData['categoryId'].toString())
             .get();
         final categoryData = categorySnapshot.docs.first.data();
         CategoryModel category = CategoryModel(
-            name: categoryData['name'],
-            id: int.parse(categoryData['id'].toString()));
+            name: categoryData['name'], id: categoryData['id'].toString());
 
         List<AddOn> addOns = [];
 
@@ -131,7 +154,7 @@ class FirestoreDatabase {
 
         CategoryModel category = CategoryModel(
             name: categoryData['name'].toString(),
-            id: int.parse(categoryData['id'].toString()));
+            id: categoryData['id'].toString());
 
         categories.add(category);
       }
@@ -139,6 +162,37 @@ class FirestoreDatabase {
       return categories;
     } catch (e) {
       return null;
+    }
+  }
+
+  Future<void> createCategory(String categoryName) async {
+    try {
+      CollectionReference categoryCollection =
+          FirebaseFirestore.instance.collection(_categoryCollection);
+
+      DocumentReference newCategoryRef = await categoryCollection.add({
+        "name": categoryName,
+      });
+
+      String categoryId = newCategoryRef.id;
+
+      await newCategoryRef.update({
+        "id": categoryId,
+      });
+    } catch (e) {
+      return;
+    }
+  }
+
+  Future<void> deleteCategory(CategoryModel category) async {
+    try {
+      CollectionReference categoryCollection =
+          FirebaseFirestore.instance.collection(_categoryCollection);
+
+      // Specify the document ID to delete
+      await categoryCollection.doc(category.id).delete();
+    } catch (e) {
+      return;
     }
   }
 
