@@ -1,3 +1,4 @@
+import 'package:bijou_cafe/models/add_on_database.dart';
 import 'package:bijou_cafe/models/category_model.dart';
 import 'package:bijou_cafe/models/online_order_model.dart';
 import 'package:bijou_cafe/models/order_model.dart';
@@ -127,6 +128,7 @@ class FirestoreDatabase {
         }
 
         ProductModel product = ProductModel(
+            id: doc.id,
             category: category,
             description: productData['description'].toString(),
             imagePath: productData["imagePath"].toString(),
@@ -140,6 +142,17 @@ class FirestoreDatabase {
       return products;
     } catch (e) {
       return null;
+    }
+  }
+
+  Future<void> deleteProduct(String id) async {
+    try {
+      CollectionReference productCollection =
+          FirebaseFirestore.instance.collection(_productsCollection);
+
+      await productCollection.doc(id).delete();
+    } catch (e) {
+      return;
     }
   }
 
@@ -162,6 +175,49 @@ class FirestoreDatabase {
       return categories;
     } catch (e) {
       return null;
+    }
+  }
+
+  Future<List<AddOnModel>?> getAllAddOns() async {
+    try {
+      List<AddOnModel> addOns = [];
+
+      final snapshot = await _firestore.collection(_addOnsCollection).get();
+
+      for (var doc in snapshot.docs) {
+        final addOnsData = doc.data();
+
+        List<AddOn> addOnsSpecific = [];
+        List<dynamic> addOnSpecificData = addOnsData['addOns'];
+
+        for (var addOnSpecific in addOnSpecificData) {
+          AddOn addOn = AddOn(
+              item: addOnSpecific['item'].toString(),
+              price: double.parse(addOnSpecific['price'].toString()));
+
+          addOnsSpecific.add(addOn);
+        }
+
+        AddOnModel addOn =
+            AddOnModel(id: addOnsData['id'], addOns: addOnsSpecific);
+
+        addOns.add(addOn);
+      }
+
+      return addOns;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  Future<void> createProduct(ProductModel product, int addOnsId) async {
+    try {
+      CollectionReference productsCollection =
+          FirebaseFirestore.instance.collection(_productsCollection);
+
+      await productsCollection.add(product.toMap(addOnsId));
+    } catch (e) {
+      return;
     }
   }
 

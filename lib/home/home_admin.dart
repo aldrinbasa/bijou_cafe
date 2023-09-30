@@ -1,6 +1,8 @@
 import 'package:bijou_cafe/constants/colors.dart';
+import 'package:bijou_cafe/home/add_product.dart';
 import 'package:bijou_cafe/home/admin_order_details.dart';
 import 'package:bijou_cafe/home/home_user_screen.dart';
+import 'package:bijou_cafe/home/manage_products.dart';
 import 'package:bijou_cafe/models/online_order_model.dart';
 import 'package:bijou_cafe/models/user_model.dart';
 import 'package:bijou_cafe/utils/firestore_database.dart';
@@ -14,10 +16,12 @@ class HomeAdminScreen extends StatefulWidget {
   State<HomeAdminScreen> createState() => _HomeAdminScreenState();
 }
 
-class _HomeAdminScreenState extends State<HomeAdminScreen> {
+class _HomeAdminScreenState extends State<HomeAdminScreen>
+    with SingleTickerProviderStateMixin {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   FirestoreDatabase firestore = FirestoreDatabase();
   final UserModel? loggedInUser = UserSingleton().user;
+  late TabController _tabController;
 
   Future<void> _refreshData() async {
     List<OnlineOrderModel>? refreshedOrders = await firestore.getAllOrder('');
@@ -35,6 +39,7 @@ class _HomeAdminScreenState extends State<HomeAdminScreen> {
   void initState() {
     super.initState();
     _refreshData();
+    _tabController = TabController(length: 3, vsync: this);
   }
 
   @override
@@ -81,25 +86,46 @@ class _HomeAdminScreenState extends State<HomeAdminScreen> {
             IconButton(
                 onPressed: () {},
                 icon: const Icon(
-                  Icons.access_alarm_outlined,
+                  Icons.notifications_active,
                   color: primaryColor,
                 ))
           ],
         ),
-        body: RefreshIndicator(
-          onRefresh: _refreshData,
-          child: ListView.builder(
-            itemCount: orders.length,
-            itemBuilder: (context, index) {
-              return CustomOrderCard(
-                order: orders[index],
-                onRefreshedOrders: (refreshedOrders) {
-                  setState(() {
-                    orders = refreshedOrders;
-                  });
+        body: TabBarView(
+          controller: _tabController,
+          children: [
+            // Tab 1 Content
+            RefreshIndicator(
+              onRefresh: _refreshData,
+              child: ListView.builder(
+                itemCount: orders.length,
+                itemBuilder: (context, index) {
+                  return CustomOrderCard(
+                    order: orders[index],
+                    onRefreshedOrders: (refreshedOrders) {
+                      setState(() {
+                        orders = refreshedOrders;
+                      });
+                    },
+                  );
                 },
-              );
-            },
+              ),
+            ),
+            const ManageProducts(),
+            const AddProductScreen(),
+          ],
+        ),
+        bottomNavigationBar: SizedBox(
+          height: 0,
+          child: TabBar(
+            indicatorColor: primaryColor,
+            controller: _tabController,
+            tabs: const [
+              Tab(icon: Icon(Icons.tab)),
+              Tab(icon: Icon(Icons.tab)),
+              Tab(icon: Icon(Icons.tab)),
+            ],
+            isScrollable: false,
           ),
         ),
       ),

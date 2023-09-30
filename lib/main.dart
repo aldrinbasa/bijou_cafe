@@ -13,6 +13,7 @@ void main() async {
   );
 
   await Permission.storage.request();
+  await Permission.camera.request();
 
   runApp(const MyApp());
 }

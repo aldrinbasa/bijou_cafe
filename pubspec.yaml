@@ -21,6 +21,9 @@ dependencies:
   permission_handler: ^10.4.3
   intl: ^0.18.1
   transparent_image: ^2.0.1
+  shimmer: ^3.0.0
+  image_picker: ^1.0.4
+  firebase_storage: ^11.2.7
 
 dev_dependencies:
   flutter_test:
