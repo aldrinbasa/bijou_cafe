@@ -1,3 +1,4 @@
+import 'package:bijou_cafe/home/admin_past_orders.dart';
 import 'package:bijou_cafe/home/cart.dart';
 import 'package:bijou_cafe/home/manage_categories.dart';
 import 'package:bijou_cafe/home/user_orders.dart';
@@ -336,23 +337,37 @@ class ClientDrawer extends StatelessWidget {
               child: ListView(
                 padding: EdgeInsets.zero,
                 children: [
-                  ListTile(
-                    leading: const Icon(Icons.book),
-                    title: const Text("Orders"),
-                    onTap: () async {
-                      Navigator.pop(context);
-                      await showDialog<int>(
-                        context: context,
-                        builder: (BuildContext context) {
-                          if (loggedInUser!.userType == 'admin') {
-                            return const Text("data");
-                          } else {
-                            return const UserOrders();
-                          }
-                        },
-                      );
-                    },
-                  ),
+                  (loggedInUser!.userType == 'admin')
+                      ? ListTile(
+                          leading: const Icon(Icons.book),
+                          title: const Text("Past Orders"),
+                          onTap: () async {
+                            Navigator.pop(context);
+                            await showDialog<int>(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return const AdminPastOrders();
+                              },
+                            );
+                          },
+                        )
+                      : ListTile(
+                          leading: const Icon(Icons.book),
+                          title: const Text("Orders"),
+                          onTap: () async {
+                            Navigator.pop(context);
+                            await showDialog<int>(
+                              context: context,
+                              builder: (BuildContext context) {
+                                if (loggedInUser!.userType == 'admin') {
+                                  return const Text("data");
+                                } else {
+                                  return const UserOrders();
+                                }
+                              },
+                            );
+                          },
+                        ),
                   (loggedInUser!.userType == 'admin')
                       ? ListTile(
                           leading: const Icon(Icons.category),

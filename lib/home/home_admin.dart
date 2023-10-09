@@ -100,17 +100,22 @@ class _HomeAdminScreenState extends State<HomeAdminScreen>
               child: ListView.builder(
                 itemCount: orders.length,
                 itemBuilder: (context, index) {
-                  return CustomOrderCard(
-                    order: orders[index],
-                    onRefreshedOrders: (refreshedOrders) {
-                      setState(() {
-                        orders = refreshedOrders;
-                      });
-                    },
-                  );
+                  if (orders[index].status != 'completed') {
+                    return CustomOrderCard(
+                      order: orders[index],
+                      onRefreshedOrders: (refreshedOrders) {
+                        setState(() {
+                          orders = refreshedOrders;
+                        });
+                      },
+                    );
+                  } else {
+                    return const SizedBox.shrink();
+                  }
                 },
               ),
             ),
+
             const ManageProducts(),
             const AddProductScreen(),
           ],
