@@ -38,6 +38,14 @@ class HomeUserScreenState extends State<HomeUserScreen> {
     CartSingleton().setCartUpdatedCallback(updateCartCount);
   }
 
+  Future<void> _refreshData() async {
+    setState(() {
+      productsFuture = firestore.getAllProducts();
+      categoryFuture = firestore.getAllCategories();
+      CartSingleton().setCartUpdatedCallback(updateCartCount);
+    });
+  }
+
   void updateCartCount(int itemCount) {
     setState(() {
       cartItemCount = itemCount;
@@ -139,7 +147,7 @@ class HomeUserScreenState extends State<HomeUserScreen> {
           ),
           title: const Center(
             child: Text(
-              'Cafe Bijou',
+              'Bijou Cafe',
               style: TextStyle(color: primaryColor),
             ),
           ),
@@ -263,22 +271,25 @@ class HomeUserScreenState extends State<HomeUserScreen> {
               const SizedBox(width: 1),
             Expanded(
               flex: 10,
-              child: FutureBuilder<List<ProductModel>?>(
-                future: productsFuture,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(
-                      child: CircularProgressIndicator(),
-                    );
-                  } else if (snapshot.hasError || !snapshot.hasData) {
-                    return const Center(
-                      child: Text('Error loading products'),
-                    );
-                  } else {
-                    final filteredProducts = filterProducts(snapshot.data!);
-                    return buildProductGrid(filteredProducts);
-                  }
-                },
+              child: RefreshIndicator(
+                onRefresh: _refreshData,
+                child: FutureBuilder<List<ProductModel>?>(
+                  future: productsFuture,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    } else if (snapshot.hasError || !snapshot.hasData) {
+                      return const Center(
+                        child: Text('Error loading products'),
+                      );
+                    } else {
+                      final filteredProducts = filterProducts(snapshot.data!);
+                      return buildProductGrid(filteredProducts);
+                    }
+                  },
+                ),
               ),
             ),
           ],

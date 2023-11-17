@@ -85,7 +85,7 @@ class _HomeAdminScreenState extends State<HomeAdminScreen>
           ),
           title: const Center(
             child: Text(
-              'Cafe Bijou (Admin)',
+              'Bijou Cafe(Admin)',
               style: TextStyle(color: primaryColor),
             ),
           ),
