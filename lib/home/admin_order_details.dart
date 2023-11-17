@@ -94,6 +94,16 @@ class _AdminOrderDetailsState extends State<AdminOrderDetails> {
                       });
                     },
                   ),
+                  RadioListTile<String>(
+                    title: const Text('Reject'),
+                    value: 'rejected',
+                    groupValue: selectedStatus,
+                    onChanged: (value) {
+                      setState(() {
+                        selectedStatus = value!;
+                      });
+                    },
+                  ),
                 ],
               ),
               actions: <Widget>[

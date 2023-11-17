@@ -245,7 +245,6 @@ class FirestoreDatabase {
       CollectionReference categoryCollection =
           FirebaseFirestore.instance.collection(_categoryCollection);
 
-      // Specify the document ID to delete
       await categoryCollection.doc(category.id).delete();
     } catch (e) {
       return;

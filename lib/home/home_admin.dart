@@ -4,6 +4,7 @@ import 'package:bijou_cafe/home/admin_order_details.dart';
 import 'package:bijou_cafe/home/home_user_screen.dart';
 import 'package:bijou_cafe/home/manage_products.dart';
 import 'package:bijou_cafe/models/online_order_model.dart';
+import 'package:bijou_cafe/models/order_model.dart';
 import 'package:bijou_cafe/models/user_model.dart';
 import 'package:bijou_cafe/utils/firestore_database.dart';
 import 'package:flutter/material.dart';
@@ -22,6 +23,7 @@ class _HomeAdminScreenState extends State<HomeAdminScreen>
   FirestoreDatabase firestore = FirestoreDatabase();
   final UserModel? loggedInUser = UserSingleton().user;
   late TabController _tabController;
+  int currentPendingOrders = 0;
 
   Future<void> _refreshData() async {
     List<OnlineOrderModel>? refreshedOrders = await firestore.getAllOrder('');
@@ -29,6 +31,13 @@ class _HomeAdminScreenState extends State<HomeAdminScreen>
     if (refreshedOrders != null) {
       setState(() {
         orders = refreshedOrders;
+
+        currentPendingOrders = 0;
+        for (OnlineOrderModel order in orders) {
+          if (order.status != 'completed' && order.status != 'rejected') {
+            currentPendingOrders++;
+          }
+        }
       });
     }
   }
@@ -76,7 +85,7 @@ class _HomeAdminScreenState extends State<HomeAdminScreen>
           ),
           title: const Center(
             child: Text(
-              'Bijou Cafe (Admin)',
+              'Cafe Bijou (Admin)',
               style: TextStyle(color: primaryColor),
             ),
           ),
@@ -94,28 +103,47 @@ class _HomeAdminScreenState extends State<HomeAdminScreen>
         body: TabBarView(
           controller: _tabController,
           children: [
-            // Tab 1 Content
             RefreshIndicator(
               onRefresh: _refreshData,
-              child: ListView.builder(
-                itemCount: orders.length,
-                itemBuilder: (context, index) {
-                  if (orders[index].status != 'completed') {
-                    return CustomOrderCard(
-                      order: orders[index],
-                      onRefreshedOrders: (refreshedOrders) {
-                        setState(() {
-                          orders = refreshedOrders;
-                        });
+              child: (currentPendingOrders == 0)
+                  ? ListView.builder(
+                      itemCount: 1,
+                      itemBuilder: (context, index) {
+                        return const Column(
+                          children: [
+                            SizedBox(
+                              height: 200,
+                            ),
+                            Center(
+                                child: Text(
+                              "You don't have any pending orders.",
+                              style:
+                                  TextStyle(color: Colors.grey, fontSize: 22),
+                            )),
+                          ],
+                        );
                       },
-                    );
-                  } else {
-                    return const SizedBox.shrink();
-                  }
-                },
-              ),
+                    )
+                  : ListView.builder(
+                      itemCount: orders.length,
+                      itemBuilder: (context, index) {
+                        if (orders[index].status != 'completed' &&
+                            orders[index].status != 'rejected') {
+                          return CustomOrderCard(
+                            order: orders[index],
+                            onRefreshedOrders: (refreshedOrders) {
+                              print(orders[index].status);
+                              setState(() {
+                                orders = refreshedOrders;
+                              });
+                            },
+                          );
+                        } else {
+                          return const SizedBox.shrink();
+                        }
+                      },
+                    ),
             ),
-
             const ManageProducts(),
             const AddProductScreen(),
           ],
@@ -334,7 +362,7 @@ class CustomOrderCard extends StatelessWidget {
                 ],
               ),
               const Divider(color: Colors.white),
-              (order.payment.referenceId != '')
+              (order.payment.referenceId != 'null')
                   ? Text(
                       'GCash RefNo.: ${order.payment.referenceId}',
                       style: const TextStyle(

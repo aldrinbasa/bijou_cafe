@@ -48,7 +48,7 @@ class ManageProductsState extends State<ManageProducts> {
               child: ElevatedButton(
                 onPressed: () {},
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: primaryColor,
+                  backgroundColor: secondaryColor,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(30.0),
                   ),
@@ -58,10 +58,16 @@ class ManageProductsState extends State<ManageProducts> {
                   children: [
                     Text(
                       "Add Product",
-                      style: TextStyle(fontSize: 16),
+                      style: TextStyle(fontSize: 16, color: primaryColor),
+                    ),
+                    Icon(
+                      Icons.swipe_right,
+                      color: primaryColor,
+                      size: 25,
                     ),
                     Icon(
                       Icons.arrow_right,
+                      color: primaryColor,
                       size: 25,
                     ),
                   ],

@@ -31,7 +31,7 @@ class PageTransition {
         pageBuilder: (context, animation, secondaryAnimation) => page,
         transitionDuration: const Duration(milliseconds: 500),
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          const begin = Offset(1.0, 0.0); // Push from the right
+          const begin = Offset(1.0, 0.0);
           const end = Offset.zero;
           const curve = Curves.easeOutQuart;
 

@@ -245,7 +245,7 @@ class HomeUserScreenState extends State<HomeUserScreen> {
             ),
             if (showCategories)
               SizedBox(
-                height: 48.0, // Adjust the height as needed
+                height: 48.0,
                 child: FutureBuilder<List<CategoryModel>?>(
                   future: categoryFuture,
                   builder: (context, snapshot) {
@@ -260,7 +260,7 @@ class HomeUserScreenState extends State<HomeUserScreen> {
                 ),
               )
             else
-              const SizedBox(width: 1), // Use width instead of height
+              const SizedBox(width: 1),
             Expanded(
               flex: 10,
               child: FutureBuilder<List<ProductModel>?>(
@@ -381,13 +381,6 @@ class ClientDrawer extends StatelessWidget {
                               },
                             );
                           },
-                        )
-                      : const SizedBox(height: 0),
-                  (loggedInUser!.userType == 'admin')
-                      ? ListTile(
-                          leading: const Icon(Icons.food_bank),
-                          title: const Text('Products'),
-                          onTap: () {},
                         )
                       : const SizedBox(height: 0),
                   ListTile(

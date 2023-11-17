@@ -247,7 +247,7 @@ class _ManageCategoriesState extends State<ManageCategories> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: primaryColor,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(0), // Rectangular shape
+                  borderRadius: BorderRadius.circular(0),
                 ),
               ),
               child: const Padding(
