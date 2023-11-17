@@ -1,8 +1,11 @@
 import 'package:bijou_cafe/constants/colors.dart';
+import 'package:bijou_cafe/constants/texts.dart';
 import 'package:bijou_cafe/models/online_order_model.dart';
 import 'package:bijou_cafe/models/user_model.dart';
 import 'package:bijou_cafe/utils/firestore_database.dart';
+import 'package:bijou_cafe/utils/toast.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 
 class UserOrders extends StatefulWidget {
@@ -17,10 +20,50 @@ class _UserOrdersState extends State<UserOrders> {
   final UserModel? loggedInUser = UserSingleton().user;
   FirestoreDatabase firestore = FirestoreDatabase();
 
+  Future<void> _refreshData() async {
+    setState(() {
+      ordersFuture = firestore.getAllOrder(loggedInUser!.uid);
+    });
+  }
+
+  Future<void> _deleteOrder(String orderId) async {
+    bool confirmDelete = false;
+
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Confirm Delete'),
+          content: const Text('Are you sure you want to cancel this order?'),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('Delete'),
+              onPressed: () {
+                confirmDelete = true;
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmDelete) {
+      await firestore.deleteOrder(orderId);
+      _refreshData();
+    }
+  }
+
   @override
   void initState() {
     super.initState();
-    ordersFuture = firestore.getAllOrder(loggedInUser!.uid);
+    _refreshData();
   }
 
   @override
@@ -88,13 +131,24 @@ class _UserOrdersState extends State<UserOrders> {
                             List<OnlineOrderModel> orders = snapshot.data!;
 
                             return Expanded(
-                              child: ListView.builder(
-                                itemCount: orders.length,
-                                itemBuilder: (context, index) {
-                                  return ListTile(
-                                    title: OrderCard(order: orders[index]),
-                                  );
-                                },
+                              child: RefreshIndicator(
+                                onRefresh: _refreshData,
+                                child: ListView.builder(
+                                  itemCount: orders.length,
+                                  itemBuilder: (context, index) {
+                                    return ListTile(
+                                      onLongPress: () {
+                                        _deleteOrder(orders[index].orderId);
+                                      },
+                                      title: OrderCard(
+                                        order: orders[index],
+                                        onRefresh: () {
+                                          _refreshData();
+                                        },
+                                      ),
+                                    );
+                                  },
+                                ),
                               ),
                             );
                           }
@@ -123,10 +177,19 @@ class _UserOrdersState extends State<UserOrders> {
   }
 }
 
-class OrderCard extends StatelessWidget {
+class OrderCard extends StatefulWidget {
   final OnlineOrderModel order;
+  final Function() onRefresh;
 
-  const OrderCard({Key? key, required this.order}) : super(key: key);
+  const OrderCard({Key? key, required this.order, required this.onRefresh})
+      : super(key: key);
+
+  @override
+  State<OrderCard> createState() => _OrderCardState();
+}
+
+class _OrderCardState extends State<OrderCard> {
+  FirestoreDatabase firestore = FirestoreDatabase();
 
   LinearGradient getStatusGradient(String status) {
     if (status.toLowerCase() == 'pending') {
@@ -164,6 +227,45 @@ class OrderCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    void processPaymentUpdate() {
+      TextEditingController referenceIdController = TextEditingController();
+
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text("Enter Reference ID"),
+            content: TextFormField(
+              controller: referenceIdController,
+              decoration: const InputDecoration(
+                labelText: "Reference ID",
+              ),
+            ),
+            actions: <Widget>[
+              TextButton(
+                child: const Text("Cancel"),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+              TextButton(
+                child: const Text("Save"),
+                onPressed: () {
+                  String referenceId = referenceIdController.text;
+
+                  firestore.updatePayment(
+                      widget.order.orderId, 'paid', referenceId);
+
+                  Navigator.of(context).pop();
+                  widget.onRefresh();
+                },
+              ),
+            ],
+          );
+        },
+      );
+    }
+
     return Card(
       elevation: 4,
       shape: RoundedRectangleBorder(
@@ -179,7 +281,7 @@ class OrderCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Order ID: ${order.orderId}',
+              'Order ID: ${widget.order.orderId}',
               style: const TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
@@ -187,7 +289,7 @@ class OrderCard extends StatelessWidget {
               ),
             ),
             Text(
-              DateFormat("MMM d, y (h:mm a)").format(order.dateOrdered),
+              DateFormat("MMM d, y (h:mm a)").format(widget.order.dateOrdered),
               style: const TextStyle(
                 fontSize: 16,
                 color: Colors.white,
@@ -205,7 +307,7 @@ class OrderCard extends StatelessWidget {
               ),
             ),
             Text(
-              order.address,
+              widget.order.address,
               style: const TextStyle(fontSize: 16, color: Colors.white),
             ),
             const SizedBox(height: 8),
@@ -218,22 +320,22 @@ class OrderCard extends StatelessWidget {
               ),
             ),
             Text(
-              order.phoneNumber,
+              widget.order.phoneNumber,
               style: const TextStyle(fontSize: 16, color: Colors.white),
             ),
             const SizedBox(
               height: 16,
             ),
             Text(
-              'Delivery Charge: ₱${order.deliveryCharge.toStringAsFixed(2)}',
+              'Delivery Charge: ₱${widget.order.deliveryCharge.toStringAsFixed(2)}',
               style: const TextStyle(fontSize: 16, color: Colors.white),
             ),
             Text(
-              'Orders: ₱${order.totalPrice.toStringAsFixed(2)}',
+              'Orders: ₱${widget.order.totalPrice.toStringAsFixed(2)}',
               style: const TextStyle(fontSize: 16, color: Colors.white),
             ),
             Text(
-              'Total: ₱${(order.totalPrice + order.deliveryCharge).toStringAsFixed(2)}',
+              'Total: ₱${(widget.order.totalPrice + widget.order.deliveryCharge).toStringAsFixed(2)}',
               style: const TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
@@ -243,7 +345,7 @@ class OrderCard extends StatelessWidget {
             Row(
               children: [
                 Text(
-                  order.payment.paymentMethod,
+                  widget.order.payment.paymentMethod,
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
@@ -257,11 +359,11 @@ class OrderCard extends StatelessWidget {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                   decoration: BoxDecoration(
-                    gradient: getStatusGradient(order.payment.status),
+                    gradient: getStatusGradient(widget.order.payment.status),
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Text(
-                    order.payment.status.toUpperCase(),
+                    widget.order.payment.status.toUpperCase(),
                     style: const TextStyle(
                       color: Colors.white,
                     ),
@@ -270,17 +372,62 @@ class OrderCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 8),
+            (widget.order.status == 'accepted' &&
+                    widget.order.payment.status == 'pending' &&
+                    widget.order.payment.paymentMethod == 'GCash')
+                ? Column(
+                    children: [
+                      TextButton(
+                        onPressed: () {
+                          processPaymentUpdate();
+                        },
+                        child: const Text(
+                          "Your order has been accepted! Kindly pay the total through GCash and provide the reference number.",
+                          style: TextStyle(
+                              color: secondaryColor,
+                              fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Text(
+                            gCashNumber,
+                            style: TextStyle(
+                                color: secondaryColor,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 26),
+                          ),
+                          IconButton(
+                            icon: const Icon(
+                              Icons.copy,
+                              color: secondaryColor,
+                            ),
+                            onPressed: () {
+                              Clipboard.setData(
+                                const ClipboardData(text: gCashNumber),
+                              );
+                              Toast.show(
+                                  context, '$gCashNumber copied to clipboard.');
+                            },
+                          ),
+                        ],
+                      )
+                    ],
+                  )
+                : const SizedBox.shrink(),
+            const SizedBox(height: 8),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 7),
               height: 40,
               constraints: const BoxConstraints(minWidth: 800.0),
               decoration: BoxDecoration(
-                gradient: getStatusGradient(order.status),
+                gradient: getStatusGradient(widget.order.status),
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Center(
                 child: Text(
-                  'Order: ${order.status.toUpperCase()}',
+                  'Order: ${widget.order.status.toUpperCase()}',
                   style: const TextStyle(
                     fontSize: 18,
                     color: Colors.white,

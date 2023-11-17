@@ -36,8 +36,7 @@ class CartDetailsWidgetState extends State<CartDetailsWidget> {
     try {
       if (paymentChoice != "") {
         PaymentModel payment = PaymentModel(
-            paymentMethod: paymentChoice,
-            status: paymentChoice == "Cash On Delivery" ? "pending" : "paid");
+            paymentMethod: paymentChoice, status: "pending", referenceId: '');
         OnlineOrderModel onlineOrder = OnlineOrderModel(
             address: address.text,
             deliveryCharge: 0.0,

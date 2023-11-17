@@ -301,7 +301,8 @@ class FirestoreDatabase {
 
         PaymentModel payment = PaymentModel(
             paymentMethod: orderData['payment']['method'],
-            status: orderData['payment']['status']);
+            status: orderData['payment']['status'],
+            referenceId: orderData['payment']['referenceId'].toString());
 
         OnlineOrderModel order = OnlineOrderModel(
             address: orderData['address'],
@@ -321,6 +322,34 @@ class FirestoreDatabase {
       return orders;
     } catch (e) {
       return null;
+    }
+  }
+
+  Future<void> updatePayment(
+      String orderId, String status, String referenceId) async {
+    try {
+      CollectionReference orderCollection =
+          FirebaseFirestore.instance.collection(_ordersCollection);
+
+      Map<String, dynamic> paymentUpdate = {
+        'payment.status': status,
+        'payment.referenceId': referenceId,
+      };
+
+      await orderCollection.doc(orderId).update(paymentUpdate);
+    } catch (e) {
+      return;
+    }
+  }
+
+  Future<void> deleteOrder(String orderId) async {
+    try {
+      CollectionReference orderCollection =
+          FirebaseFirestore.instance.collection(_ordersCollection);
+
+      await orderCollection.doc(orderId).delete();
+    } catch (e) {
+      return;
     }
   }
 }

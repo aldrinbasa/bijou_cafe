@@ -334,6 +334,15 @@ class CustomOrderCard extends StatelessWidget {
                 ],
               ),
               const Divider(color: Colors.white),
+              (order.payment.referenceId != '')
+                  ? Text(
+                      'GCash RefNo.: ${order.payment.referenceId}',
+                      style: const TextStyle(
+                        fontSize: 20,
+                        color: Colors.white,
+                      ),
+                    )
+                  : const SizedBox(height: 0),
               Align(
                 alignment: Alignment.center,
                 child: Chip(

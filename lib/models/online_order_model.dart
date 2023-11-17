@@ -45,8 +45,12 @@ class OnlineOrderModel {
 class PaymentModel {
   String paymentMethod;
   String status;
+  String referenceId;
 
-  PaymentModel({required this.paymentMethod, required this.status});
+  PaymentModel(
+      {required this.paymentMethod,
+      required this.status,
+      required this.referenceId});
 
   Map<String, dynamic> toMap() {
     return {

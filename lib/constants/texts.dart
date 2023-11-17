@@ -24,3 +24,4 @@ const String gmailNotRegistered =
 
 // Home
 const String appTitle = "Bijou Cafe App";
+const String gCashNumber = "09289216384";
