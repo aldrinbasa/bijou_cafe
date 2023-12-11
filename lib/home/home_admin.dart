@@ -11,13 +11,14 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class HomeAdminScreen extends StatefulWidget {
-  const HomeAdminScreen({Key? key});
+  const HomeAdminScreen({super.key});
 
   @override
   State<HomeAdminScreen> createState() => _HomeAdminScreenState();
 }
 
-class _HomeAdminScreenState extends State<HomeAdminScreen> with SingleTickerProviderStateMixin {
+class _HomeAdminScreenState extends State<HomeAdminScreen>
+    with SingleTickerProviderStateMixin {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   FirestoreDatabase firestore = FirestoreDatabase();
   final UserModel? loggedInUser = UserSingleton().user;
@@ -90,6 +91,14 @@ class _HomeAdminScreenState extends State<HomeAdminScreen> with SingleTickerProv
           ),
           backgroundColor: secondaryColor,
           elevation: 0,
+          actions: [
+            IconButton(
+                onPressed: () {},
+                icon: const Icon(
+                  Icons.notifications_active,
+                  color: primaryColor,
+                ))
+          ],
         ),
         body: TabBarView(
           controller: _tabController,
@@ -108,7 +117,8 @@ class _HomeAdminScreenState extends State<HomeAdminScreen> with SingleTickerProv
                             Center(
                                 child: Text(
                               "You don't have any pending orders.",
-                              style: TextStyle(color: Colors.grey, fontSize: 22),
+                              style:
+                                  TextStyle(color: Colors.grey, fontSize: 22),
                             )),
                           ],
                         );
