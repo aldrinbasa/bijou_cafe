@@ -1,6 +1,7 @@
 import 'package:bijou_cafe/home/admin_past_orders.dart';
 import 'package:bijou_cafe/home/cart.dart';
 import 'package:bijou_cafe/home/manage_categories.dart';
+import 'package:bijou_cafe/home/manage_sales.dart';
 import 'package:bijou_cafe/home/user_orders.dart';
 import 'package:bijou_cafe/init/login/login_controller.dart';
 import 'package:bijou_cafe/models/order_model.dart';
@@ -389,6 +390,21 @@ class ClientDrawer extends StatelessWidget {
                               context: context,
                               builder: (BuildContext context) {
                                 return const ManageCategories();
+                              },
+                            );
+                          },
+                        )
+                      : const SizedBox(height: 0),
+                  (loggedInUser!.userType == 'admin')
+                      ? ListTile(
+                          leading: const Icon(Icons.wallet),
+                          title: const Text('Sales'),
+                          onTap: () {
+                            Navigator.of(context).pop();
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return const ManageSales();
                               },
                             );
                           },
