@@ -17,11 +17,14 @@ class CartDetailsWidgetState extends State<CartDetailsWidget> {
   final UserModel? loggedInUser = UserSingleton().user;
   bool isCartEmpty = false;
   double totalPrice = 0;
+  double discountedPrice = 0;
   bool isCheckingOut = false;
   bool paymentMethodSelected = false;
+  bool voucherApplicable = false;
   String paymentChoice = "";
   TextEditingController phoneNumber = TextEditingController();
   TextEditingController address = TextEditingController();
+  TextEditingController voucher = TextEditingController();
 
   FirestoreDatabase firestoreDatabase = FirestoreDatabase();
 
@@ -101,100 +104,214 @@ class CartDetailsWidgetState extends State<CartDetailsWidget> {
                 const SizedBox(
                   height: 16,
                 ),
-                TextFormField(
-                  keyboardType: TextInputType.number,
-                  decoration: InputDecoration(
-                    hintText: 'Phone Number',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(20.0),
+                SingleChildScrollView(
+                  child: Column(children: [
+                    TextFormField(
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        hintText: 'Phone Number',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(20.0),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: const BorderSide(color: primaryColor),
+                          borderRadius: BorderRadius.circular(20.0),
+                        ),
+                        contentPadding: const EdgeInsets.all(.0),
+                        prefixIcon: const Icon(
+                          Icons.phone,
+                          color: primaryColor,
+                        ),
+                      ),
+                      controller: phoneNumber,
                     ),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: const BorderSide(color: primaryColor),
-                      borderRadius: BorderRadius.circular(20.0),
+                    const SizedBox(
+                      height: 16,
                     ),
-                    contentPadding: const EdgeInsets.all(.0),
-                    prefixIcon: const Icon(
-                      Icons.phone,
-                      color: primaryColor,
+                    const Text(
+                      "Payment Method",
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: primaryColor,
+                      ),
+                      textAlign: TextAlign.start,
                     ),
-                  ),
-                  controller: phoneNumber,
-                ),
-                const SizedBox(
-                  height: 16,
-                ),
-                const Text(
-                  "Payment Method",
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: primaryColor,
-                  ),
-                  textAlign: TextAlign.start,
-                ),
-                Visibility(
-                  visible: !paymentMethodSelected,
-                  child: const Text(
-                    "*Choose a payment method",
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.red,
+                    Visibility(
+                      visible: !paymentMethodSelected,
+                      child: const Text(
+                        "*Choose a payment method",
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.red,
+                        ),
+                        textAlign: TextAlign.start,
+                      ),
                     ),
-                    textAlign: TextAlign.start,
-                  ),
-                ),
-                RadioListTile<String>(
-                  title: const Text('GCash'),
-                  value: 'GCash',
-                  groupValue: paymentChoice,
-                  onChanged: (value) {
-                    setState(() {
-                      paymentChoice = value!;
-                      paymentMethodSelected = true;
-                    });
-                  },
-                ),
-                RadioListTile<String>(
-                  title: const Text('Cash On Delivery'),
-                  value: 'Cash On Delivery',
-                  groupValue: paymentChoice,
-                  onChanged: (value) {
-                    setState(() {
-                      paymentChoice = value!;
-                      paymentMethodSelected = true;
-                    });
-                  },
+                    RadioListTile<String>(
+                      title: const Text('GCash'),
+                      value: 'GCash',
+                      groupValue: paymentChoice,
+                      onChanged: (value) {
+                        setState(() {
+                          paymentChoice = value!;
+                          paymentMethodSelected = true;
+                        });
+                      },
+                    ),
+                    RadioListTile<String>(
+                      title: const Text('Credit Card'),
+                      value: 'CreditCard',
+                      groupValue: paymentChoice,
+                      onChanged: (value) {
+                        setState(() {
+                          paymentChoice = value!;
+                          paymentMethodSelected = true;
+                        });
+                      },
+                    ),
+                    RadioListTile<String>(
+                      title: const Text('Paypal'),
+                      value: 'PaypalR',
+                      groupValue: paymentChoice,
+                      onChanged: (value) {
+                        setState(() {
+                          paymentChoice = value!;
+                          paymentMethodSelected = true;
+                        });
+                      },
+                    ),
+                    RadioListTile<String>(
+                      title: const Text('Cash On Delivery'),
+                      value: 'Cash On Delivery',
+                      groupValue: paymentChoice,
+                      onChanged: (value) {
+                        setState(() {
+                          paymentChoice = value!;
+                          paymentMethodSelected = true;
+                        });
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    Container(
+                      height: 60.0,
+                      child: TextFormField(
+                        decoration: InputDecoration(
+                          hintText: 'Voucher/Discount',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(20.0),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: const BorderSide(color: primaryColor),
+                            borderRadius: BorderRadius.circular(20.0),
+                          ),
+                          contentPadding: const EdgeInsets.all(10.0),
+                          prefixIcon: const Icon(
+                            Icons.discount,
+                            color: primaryColor,
+                          ),
+                          suffixIcon: GestureDetector(
+                            onTap: () {
+                              if (voucher.text == "NEWYEAR") {
+                                setState(() {
+                                  voucherApplicable = true;
+                                  discountedPrice = totalPrice * 0.9;
+                                });
+                              } else if (voucher.text == "10%OFF") {
+                                setState(() {
+                                  voucherApplicable = true;
+                                  discountedPrice = totalPrice * 0.9;
+                                });
+                              } else if (voucher.text == "50%OFF") {
+                                setState(() {
+                                  voucherApplicable = true;
+                                  discountedPrice = totalPrice * 0.5;
+                                });
+                              } else {
+                                discountedPrice = 0;
+                                voucherApplicable = false;
+                              }
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.all(10.0),
+                              child: const Text(
+                                'Apply',
+                                style: TextStyle(
+                                  color: primaryColor,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        controller: voucher,
+                      ),
+                    ),
+                    voucherApplicable
+                        ? const SizedBox(height: 0)
+                        : Text("Voucher doesn't exist."),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    TextFormField(
+                      decoration: InputDecoration(
+                        hintText: 'Address',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(20.0),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: const BorderSide(color: primaryColor),
+                          borderRadius: BorderRadius.circular(20.0),
+                        ),
+                        contentPadding: const EdgeInsets.all(.0),
+                        prefixIcon: const Icon(
+                          Icons.home,
+                          color: primaryColor,
+                        ),
+                      ),
+                      controller: address,
+                    ),
+                  ]),
                 ),
                 const SizedBox(height: 16),
-                TextFormField(
-                  decoration: InputDecoration(
-                    hintText: 'Address',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(20.0),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: const BorderSide(color: primaryColor),
-                      borderRadius: BorderRadius.circular(20.0),
-                    ),
-                    contentPadding: const EdgeInsets.all(.0),
-                    prefixIcon: const Icon(
-                      Icons.home,
-                      color: primaryColor,
-                    ),
-                  ),
-                  controller: address,
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  "₱${totalPrice.toStringAsFixed(2)}",
-                  style: const TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    color: primaryColor,
-                  ),
-                  textAlign: TextAlign.end,
-                ),
+                voucherApplicable
+                    ? const SizedBox(width: 0, height: 0)
+                    : Text(
+                        "₱${totalPrice.toStringAsFixed(2)}",
+                        style: const TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: primaryColor,
+                        ),
+                        textAlign: TextAlign.end,
+                      ),
+                voucherApplicable
+                    ? Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Text(
+                            "(₱${totalPrice.toStringAsFixed(2)})",
+                            style: const TextStyle(
+                              decoration: TextDecoration.lineThrough,
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.redAccent,
+                            ),
+                            textAlign: TextAlign.end,
+                          ),
+                          Text(
+                            " ₱${discountedPrice.toStringAsFixed(2)}",
+                            style: const TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                              color: primaryColor,
+                            ),
+                            textAlign: TextAlign.end,
+                          ),
+                        ],
+                      )
+                    : const SizedBox(width: 0, height: 0),
                 const SizedBox(height: 16),
                 ElevatedButton(
                   onPressed: () {

@@ -410,6 +410,21 @@ class ClientDrawer extends StatelessWidget {
                           },
                         )
                       : const SizedBox(height: 0),
+                  (loggedInUser!.userType == 'admin')
+                      ? ListTile(
+                          leading: const Icon(Icons.inventory),
+                          title: const Text('Inventory'),
+                          onTap: () {
+                            Navigator.of(context).pop();
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return const ManageSales();
+                              },
+                            );
+                          },
+                        )
+                      : const SizedBox(height: 0),
                   ListTile(
                     leading: const Icon(Icons.logout),
                     title: const Text("Logout"),
