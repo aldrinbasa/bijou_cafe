@@ -2,6 +2,7 @@ import 'package:bijou_cafe/constants/colors.dart';
 import 'package:bijou_cafe/models/online_order_model.dart';
 import 'package:bijou_cafe/models/order_model.dart';
 import 'package:bijou_cafe/models/user_model.dart';
+import 'package:bijou_cafe/models/voucher_model.dart';
 import 'package:bijou_cafe/utils/firestore_database.dart';
 import 'package:bijou_cafe/utils/toast.dart';
 import 'package:flutter/material.dart';
@@ -15,6 +16,7 @@ class CartDetailsWidget extends StatefulWidget {
 
 class CartDetailsWidgetState extends State<CartDetailsWidget> {
   final UserModel? loggedInUser = UserSingleton().user;
+  VoucherModel? voucherApplied;
   bool isCartEmpty = false;
   double totalPrice = 0;
   double discountedPrice = 0;
@@ -41,6 +43,8 @@ class CartDetailsWidgetState extends State<CartDetailsWidget> {
         PaymentModel payment = PaymentModel(
             paymentMethod: paymentChoice, status: "pending", referenceId: '');
         OnlineOrderModel onlineOrder = OnlineOrderModel(
+            voucherDiscount:
+                (voucherApplied != null) ? voucherApplied!.percentage : 0,
             address: address.text,
             deliveryCharge: 0.0,
             orders: CartSingleton().orders,
@@ -212,25 +216,23 @@ class CartDetailsWidgetState extends State<CartDetailsWidget> {
                             color: primaryColor,
                           ),
                           suffixIcon: GestureDetector(
-                            onTap: () {
-                              if (voucher.text == "NEWYEAR") {
+                            onTap: () async {
+                              String voucherCode = voucher.text;
+
+                              voucherApplied = await firestoreDatabase
+                                  .verifyVoucher(voucherCode);
+
+                              if (voucherApplied!.percentage != 0) {
                                 setState(() {
                                   voucherApplicable = true;
-                                  discountedPrice = totalPrice * 0.9;
-                                });
-                              } else if (voucher.text == "10%OFF") {
-                                setState(() {
-                                  voucherApplicable = true;
-                                  discountedPrice = totalPrice * 0.9;
-                                });
-                              } else if (voucher.text == "50%OFF") {
-                                setState(() {
-                                  voucherApplicable = true;
-                                  discountedPrice = totalPrice * 0.5;
+                                  discountedPrice = totalPrice *
+                                      (1 - voucherApplied!.percentage / 100);
                                 });
                               } else {
-                                discountedPrice = 0;
-                                voucherApplicable = false;
+                                setState(() {
+                                  discountedPrice = 0;
+                                  voucherApplicable = false;
+                                });
                               }
                             },
                             child: Container(
@@ -250,7 +252,7 @@ class CartDetailsWidgetState extends State<CartDetailsWidget> {
                     ),
                     voucherApplicable
                         ? const SizedBox(height: 0)
-                        : Text("Voucher doesn't exist."),
+                        : const Text("Voucher doesn't exist."),
                     const SizedBox(
                       height: 10,
                     ),
@@ -314,7 +316,12 @@ class CartDetailsWidgetState extends State<CartDetailsWidget> {
                     : const SizedBox(width: 0, height: 0),
                 const SizedBox(height: 16),
                 ElevatedButton(
-                  onPressed: () {
+                  onPressed: () async {
+                    if (voucherApplied != null) {
+                      if (voucherApplied!.percentage != 0) {
+                        firestoreDatabase.useVoucher(voucherApplied!);
+                      }
+                    }
                     processCheckOut();
                   },
                   style: ElevatedButton.styleFrom(

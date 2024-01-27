@@ -1,6 +1,7 @@
 import 'package:bijou_cafe/models/order_model.dart';
 
 class OnlineOrderModel {
+  double voucherDiscount;
   String orderId;
   String address;
   double deliveryCharge;
@@ -13,7 +14,8 @@ class OnlineOrderModel {
   DateTime dateOrdered = DateTime.now();
 
   OnlineOrderModel(
-      {required this.address,
+      {required this.voucherDiscount,
+      required this.address,
       required this.deliveryCharge,
       required this.orders,
       required this.payment,
@@ -25,10 +27,12 @@ class OnlineOrderModel {
     for (int i = 0; i < orders.length; i++) {
       totalPrice = totalPrice + orders[i].totalPrice;
     }
+    totalPrice = totalPrice - ((voucherDiscount / 100) * totalPrice);
   }
 
   Map<String, dynamic> toMap() {
     return {
+      'voucherDiscount': voucherDiscount,
       'address': address,
       'deliveryCharge': deliveryCharge,
       'items': orders.map((order) => order.toMap()).toList(),

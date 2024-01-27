@@ -1,8 +1,11 @@
+import 'dart:ffi';
+
 import 'package:bijou_cafe/models/add_on_database.dart';
 import 'package:bijou_cafe/models/category_model.dart';
 import 'package:bijou_cafe/models/online_order_model.dart';
 import 'package:bijou_cafe/models/order_model.dart';
 import 'package:bijou_cafe/models/product_model.dart';
+import 'package:bijou_cafe/models/voucher_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:bijou_cafe/models/user_model.dart';
 
@@ -14,6 +17,7 @@ class FirestoreDatabase {
   final String _categoryCollection = 'categories';
   final String _addOnsCollection = 'addOns';
   final String _ordersCollection = 'orders';
+  final String _vouchersCollection = 'discounts';
 
   Future<Map<String, dynamic>?> getUserInfoByUUID(String uid) async {
     try {
@@ -304,6 +308,7 @@ class FirestoreDatabase {
             referenceId: orderData['payment']['referenceId'].toString());
 
         OnlineOrderModel order = OnlineOrderModel(
+            voucherDiscount: orderData['voucherDiscount'],
             address: orderData['address'],
             deliveryCharge:
                 double.parse(orderData['deliveryCharge'].toString()),
@@ -347,6 +352,53 @@ class FirestoreDatabase {
           FirebaseFirestore.instance.collection(_ordersCollection);
 
       await orderCollection.doc(orderId).delete();
+    } catch (e) {
+      return;
+    }
+  }
+
+  Future<VoucherModel?> verifyVoucher(String codeApplied) async {
+    try {
+      List<VoucherModel> vouchers = [];
+
+      final snapshot = await _firestore.collection(_vouchersCollection).get();
+
+      for (var doc in snapshot.docs) {
+        final voucherData = doc.data();
+
+        VoucherModel voucher = VoucherModel(
+          id: doc.id,
+          code: voucherData['code'].toString(),
+          percentage: double.parse(voucherData['percentage'].toString()),
+          used: bool.parse(voucherData['used'].toString()),
+        );
+
+        vouchers.add(voucher);
+      }
+
+      VoucherModel validVoucher = vouchers.firstWhere(
+          (voucher) => voucher.code == codeApplied && !voucher.used,
+          orElse: () =>
+              VoucherModel(id: '', code: '', percentage: 0, used: false));
+
+      return validVoucher;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  Future<void> useVoucher(VoucherModel voucher) async {
+    try {
+      CollectionReference orderCollection =
+          FirebaseFirestore.instance.collection(_vouchersCollection);
+
+      Map<String, dynamic> voucherUpdate = {
+        'code': voucher.code,
+        'percentage': voucher.percentage,
+        'used': true
+      };
+
+      await orderCollection.doc(voucher.id).update(voucherUpdate);
     } catch (e) {
       return;
     }
