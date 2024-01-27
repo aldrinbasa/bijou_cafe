@@ -198,7 +198,7 @@ class CartDetailsWidgetState extends State<CartDetailsWidget> {
                       },
                     ),
                     const SizedBox(height: 16),
-                    Container(
+                    SizedBox(
                       height: 60.0,
                       child: TextFormField(
                         decoration: InputDecoration(

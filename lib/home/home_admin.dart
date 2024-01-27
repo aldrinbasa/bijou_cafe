@@ -131,7 +131,6 @@ class _HomeAdminScreenState extends State<HomeAdminScreen>
                           return CustomOrderCard(
                             order: orders[index],
                             onRefreshedOrders: (refreshedOrders) {
-                              print(orders[index].status);
                               setState(() {
                                 orders = refreshedOrders;
                               });

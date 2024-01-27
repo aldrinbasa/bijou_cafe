@@ -56,20 +56,20 @@ class ManageSalesState extends State<ManageSales> {
         width: double.infinity,
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.2),
               spreadRadius: 2,
               blurRadius: 5,
-              offset: Offset(0, 2),
+              offset: const Offset(0, 2),
             ),
           ],
         ),
         child: Column(
           children: [
-            Padding(
-              padding: const EdgeInsets.all(16.0),
+            const Padding(
+              padding: EdgeInsets.all(16.0),
               child: Text(
                 'Sales',
                 style: TextStyle(
@@ -95,9 +95,9 @@ class ManageSalesState extends State<ManageSales> {
                             return Theme(
                               data: ThemeData.light().copyWith(
                                 primaryColor: Colors.black,
-                                colorScheme:
-                                    ColorScheme.light(primary: Colors.black),
-                                buttonTheme: ButtonThemeData(
+                                colorScheme: const ColorScheme.light(
+                                    primary: Colors.black),
+                                buttonTheme: const ButtonThemeData(
                                     textTheme: ButtonTextTheme.primary),
                               ),
                               child: child!,
@@ -125,13 +125,14 @@ class ManageSalesState extends State<ManageSales> {
                                   ? 'Select Date From'
                                   : 'From: ${DateFormat('yyyy-MM-dd').format(_selectedDateFrom!)}',
                             ),
-                            Icon(Icons.calendar_today, color: Colors.black),
+                            const Icon(Icons.calendar_today,
+                                color: Colors.black),
                           ],
                         ),
                       ),
                     ),
                   ),
-                  SizedBox(height: 16),
+                  const SizedBox(height: 16),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
                     child: InkWell(
@@ -145,9 +146,9 @@ class ManageSalesState extends State<ManageSales> {
                             return Theme(
                               data: ThemeData.light().copyWith(
                                 primaryColor: Colors.black,
-                                colorScheme:
-                                    ColorScheme.light(primary: Colors.black),
-                                buttonTheme: ButtonThemeData(
+                                colorScheme: const ColorScheme.light(
+                                    primary: Colors.black),
+                                buttonTheme: const ButtonThemeData(
                                     textTheme: ButtonTextTheme.primary),
                               ),
                               child: child!,
@@ -175,7 +176,8 @@ class ManageSalesState extends State<ManageSales> {
                                   ? 'Select Date To'
                                   : 'To: ${DateFormat('yyyy-MM-dd').format(_selectedDateTo!)}',
                             ),
-                            Icon(Icons.calendar_today, color: Colors.black),
+                            const Icon(Icons.calendar_today,
+                                color: Colors.black),
                           ],
                         ),
                       ),
@@ -187,7 +189,7 @@ class ManageSalesState extends State<ManageSales> {
                       itemBuilder: (context, index) {
                         OnlineOrderModel order = orders[index];
                         return Card(
-                          margin: EdgeInsets.all(8.0),
+                          margin: const EdgeInsets.all(8.0),
                           child: ListTile(
                             title: Text('Order ID: ${order.orderId}'),
                             subtitle: Column(
@@ -210,14 +212,14 @@ class ManageSalesState extends State<ManageSales> {
                     padding: const EdgeInsets.all(16.0),
                     child: Text(
                       'Total Sales: ${_calculateTotalSales().toString()}',
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.all(16.0),
+                  const Padding(
+                    padding: EdgeInsets.all(16.0),
                     child: Text(
                       'Top 3 Selling Items:',
                       style: TextStyle(
@@ -240,9 +242,8 @@ class ManageSalesState extends State<ManageSales> {
                   borderRadius: BorderRadius.circular(0),
                 ),
               ),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                    vertical: 16.0, horizontal: 24.0),
+              child: const Padding(
+                padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 24.0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -294,13 +295,13 @@ class ManageSalesState extends State<ManageSales> {
           children: [
             Text(
               '${productInfo[0]} - ${productInfo[1]}',
-              style: TextStyle(fontSize: 16),
+              style: const TextStyle(fontSize: 16),
             ),
             Text(
               'Quantity Sold: ${sortedProducts[i].value}',
-              style: TextStyle(fontSize: 14, color: Colors.grey),
+              style: const TextStyle(fontSize: 14, color: Colors.grey),
             ),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
           ],
         ),
       );
