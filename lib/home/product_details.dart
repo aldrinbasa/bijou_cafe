@@ -163,6 +163,16 @@ class ProductDetailModalState extends State<ProductDetailModal> {
                             );
                           }).toList(),
                         ),
+                        Text(
+                          (selectedVariant.stock > 0)
+                              ? "Stock: ${selectedVariant.stock}"
+                              : "Not Available",
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87,
+                          ),
+                        ),
                         AddOnsList(
                           addOns: widget.product.addOns,
                           quantities: addOnQuantities,
@@ -189,34 +199,41 @@ class ProductDetailModalState extends State<ProductDetailModal> {
                       ),
                     ),
                     ElevatedButton(
-                      onPressed: () {
-                        String notes = "";
+                      onPressed: (selectedVariant.stock > 0)
+                          ? () {
+                              String notes = "";
 
-                        for (int i = 0; i < widget.product.addOns.length; i++) {
-                          if (addOnQuantities[i] > 0) {
-                            notes =
-                                "$notes ${widget.product.addOns[i].item} (x${addOnQuantities[i]})\n";
-                          }
-                        }
+                              for (int i = 0;
+                                  i < widget.product.addOns.length;
+                                  i++) {
+                                if (addOnQuantities[i] > 0) {
+                                  notes =
+                                      "$notes ${widget.product.addOns[i].item} (x${addOnQuantities[i]})\n";
+                                }
+                              }
 
-                        OrderModel order = OrderModel(
-                            productName: widget.product.name,
-                            notes: notes.trimRight(),
-                            quantity: numberOfOrder,
-                            totalPrice: calculateTotalPrice(),
-                            variant: (selectedVariant.variant != "")
-                                ? selectedVariant.variant
-                                : "Single Order",
-                            imagePath: widget.product.imagePath);
+                              OrderModel order = OrderModel(
+                                productName: widget.product.name,
+                                notes: notes.trimRight(),
+                                quantity: numberOfOrder,
+                                totalPrice: calculateTotalPrice(),
+                                variant: (selectedVariant.variant.isNotEmpty)
+                                    ? selectedVariant.variant
+                                    : "Single Order",
+                                imagePath: widget.product.imagePath,
+                              );
 
-                        addItemToCart(order);
-                        Navigator.of(context).pop();
-                      },
+                              addItemToCart(order);
+                              Navigator.of(context).pop();
+                            }
+                          : null,
                       style: ElevatedButton.styleFrom(
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(25.0),
                         ),
-                        backgroundColor: primaryColor,
+                        backgroundColor: (selectedVariant.stock > 0)
+                            ? primaryColor
+                            : Colors.grey,
                       ),
                       child: const Row(
                         mainAxisAlignment: MainAxisAlignment.center,

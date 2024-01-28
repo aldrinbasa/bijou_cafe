@@ -1,4 +1,5 @@
 import 'package:bijou_cafe/constants/colors.dart';
+import 'package:bijou_cafe/home/admin_inventory.dart';
 import 'package:bijou_cafe/models/product_model.dart';
 import 'package:bijou_cafe/utils/firestore_database.dart';
 import 'package:flutter/material.dart';
@@ -157,6 +158,14 @@ class ManageProductsState extends State<ManageProducts> {
 
   Widget _productTile(ProductModel product) {
     return GestureDetector(
+      onTap: () {
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AdminInventory(product: product);
+          },
+        );
+      },
       onLongPress: () async {
         final bool deleteConfirmed = await showDialog(
           context: context,

@@ -232,6 +232,8 @@ class _AddProductScreenState extends State<AddProductScreen> {
                         TextEditingController();
                     TextEditingController priceController =
                         TextEditingController();
+                    TextEditingController stockController =
+                        TextEditingController();
 
                     await showDialog(
                       context: context,
@@ -254,6 +256,13 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                 ),
                                 keyboardType: TextInputType.number,
                               ),
+                              TextFormField(
+                                controller: stockController,
+                                decoration: const InputDecoration(
+                                  hintText: "Stock",
+                                ),
+                                keyboardType: TextInputType.number,
+                              ),
                             ],
                           ),
                           actions: <Widget>[
@@ -264,10 +273,13 @@ class _AddProductScreenState extends State<AddProductScreen> {
                             TextButton(
                               onPressed: () {
                                 if (priceController.text.isNotEmpty ||
-                                    variantController.text.isNotEmpty) {
+                                    variantController.text.isNotEmpty ||
+                                    stockController.text.isNotEmpty) {
                                   Variant variant = Variant(
-                                      price: double.parse(priceController.text),
-                                      variant: variantController.text);
+                                    price: double.parse(priceController.text),
+                                    variant: variantController.text,
+                                    stock: int.parse(stockController.text),
+                                  );
 
                                   setState(() {
                                     variants.add(variant);

@@ -92,8 +92,10 @@ class FirestoreDatabase {
 
         for (var variationData in variationsData) {
           Variant variant = Variant(
-              price: double.parse(variationData['price'].toString()),
-              variant: variationData['variant'].toString());
+            price: double.parse(variationData['price'].toString()),
+            variant: variationData['variant'].toString(),
+            stock: int.parse(variationData['stock'].toString()),
+          );
 
           variants.add(variant);
         }
@@ -397,6 +399,32 @@ class FirestoreDatabase {
       };
 
       await orderCollection.doc(voucher.id).update(voucherUpdate);
+    } catch (e) {
+      return;
+    }
+  }
+
+  Future<void> updateProductStock(
+      ProductModel productToUpdate, String variant, int stock) async {
+    try {
+      CollectionReference productCollection =
+          FirebaseFirestore.instance.collection(_productsCollection);
+
+      List<Map<String, dynamic>> updatedVariations =
+          List<Map<String, dynamic>>.from(productToUpdate.variation
+              .map((variant) => variant.toMap())
+              .toList());
+
+      int index = updatedVariations
+          .indexWhere((element) => element['variant'] == variant);
+
+      if (index != -1) {
+        updatedVariations[index]['stock'] = stock;
+      }
+
+      await productCollection.doc(productToUpdate.id).update({
+        'variations': updatedVariations,
+      });
     } catch (e) {
       return;
     }

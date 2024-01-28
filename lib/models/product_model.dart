@@ -35,7 +35,11 @@ class ProductModel {
     } else {
       variation[0].variant = '';
       productMap['variations'] = [
-        {'variant': '', 'price': variation[0].price}
+        {
+          'variant': '',
+          'price': variation[0].price,
+          'stock': variation[0].stock
+        }
       ];
     }
 
@@ -50,14 +54,12 @@ class ProductModel {
 class Variant {
   double price;
   String variant;
+  int stock;
 
-  Variant({
-    required this.price,
-    required this.variant,
-  });
+  Variant({required this.price, required this.variant, required this.stock});
 
   Map<String, dynamic> toMap() {
-    return {'price': price, 'variant': variant};
+    return {'price': price, 'variant': variant, 'stock': stock};
   }
 }
 
