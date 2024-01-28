@@ -1,3 +1,4 @@
+import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:bijou_cafe/constants/colors.dart';
 import 'package:bijou_cafe/home/add_product.dart';
 import 'package:bijou_cafe/home/admin_order_details.dart';
@@ -6,6 +7,7 @@ import 'package:bijou_cafe/home/manage_products.dart';
 import 'package:bijou_cafe/models/online_order_model.dart';
 import 'package:bijou_cafe/models/user_model.dart';
 import 'package:bijou_cafe/utils/firestore_database.dart';
+import 'package:bijou_cafe/utils/notifications.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -26,6 +28,9 @@ class _HomeAdminScreenState extends State<HomeAdminScreen>
 
   Future<void> _refreshData() async {
     List<OnlineOrderModel>? refreshedOrders = await firestore.getAllOrder('');
+
+    Notifications notifications = Notifications();
+    notifications.updateNewOrderNotifValue(false);
 
     if (refreshedOrders != null) {
       setState(() {
@@ -48,6 +53,23 @@ class _HomeAdminScreenState extends State<HomeAdminScreen>
     super.initState();
     _refreshData();
     _tabController = TabController(length: 3, vsync: this);
+
+    Notifications notifications = Notifications();
+    notifications.listenToNewOrderNotif();
+
+    notifications.newOrderNotifStream.listen((value) {
+      if (value && loggedInUser!.userType == "admin") {
+        AwesomeNotifications().createNotification(
+          content: NotificationContent(
+            id: 1,
+            channelKey: "basic_channel",
+            title: "NEW ORDER!",
+            body:
+                "Hi Admin! You have a new order. Click this banner for more details.",
+          ),
+        );
+      }
+    });
   }
 
   @override

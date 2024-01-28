@@ -4,6 +4,7 @@ import 'package:bijou_cafe/models/order_model.dart';
 import 'package:bijou_cafe/models/user_model.dart';
 import 'package:bijou_cafe/models/voucher_model.dart';
 import 'package:bijou_cafe/utils/firestore_database.dart';
+import 'package:bijou_cafe/utils/notifications.dart';
 import 'package:bijou_cafe/utils/toast.dart';
 import 'package:flutter/material.dart';
 
@@ -37,7 +38,7 @@ class CartDetailsWidgetState extends State<CartDetailsWidget> {
     calculateTotalPrice();
   }
 
-  void processCheckOut() {
+  Future<void> processCheckOut() async {
     try {
       if (paymentChoice != "") {
         PaymentModel payment = PaymentModel(
@@ -57,10 +58,15 @@ class CartDetailsWidgetState extends State<CartDetailsWidget> {
 
         firestoreDatabase.createOrder(onlineOrder);
 
+        Notifications notifications = Notifications();
+        await notifications.updateNewOrderNotifValue(true);
+
+        // ignore: use_build_context_synchronously
         Navigator.of(context).pop(CartSingleton().getCartItemCount());
 
         CartSingleton().clearCart();
 
+        // ignore: use_build_context_synchronously
         Toast.show(context,
             "Your order has been received! Wait for shop confirmation");
       } else {

@@ -1,6 +1,8 @@
 import 'package:bijou_cafe/constants/colors.dart';
 import 'package:bijou_cafe/models/online_order_model.dart';
+import 'package:bijou_cafe/models/user_model.dart';
 import 'package:bijou_cafe/utils/firestore_database.dart';
+import 'package:bijou_cafe/utils/notifications.dart';
 import 'package:flutter/material.dart';
 import 'package:transparent_image/transparent_image.dart';
 
@@ -13,6 +15,7 @@ class AdminOrderDetails extends StatefulWidget {
 }
 
 class _AdminOrderDetailsState extends State<AdminOrderDetails> {
+  final UserModel? loggedInUser = UserSingleton().user;
   FirestoreDatabase firestore = FirestoreDatabase();
 
   void _saveDeliveryCharge() async {
@@ -117,6 +120,11 @@ class _AdminOrderDetailsState extends State<AdminOrderDetails> {
                   onPressed: () {
                     widget.order.status = selectedStatus;
                     Navigator.of(context).pop();
+
+                    Notifications notifications = Notifications();
+                    notifications.addUserNotif(
+                        widget.order.userID, selectedStatus, true);
+
                     _saveDeliveryCharge();
                   },
                   child: const Text('Save'),

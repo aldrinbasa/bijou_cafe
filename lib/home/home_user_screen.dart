@@ -1,3 +1,4 @@
+import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:bijou_cafe/home/admin_past_orders.dart';
 import 'package:bijou_cafe/home/cart.dart';
 import 'package:bijou_cafe/home/manage_categories.dart';
@@ -6,6 +7,7 @@ import 'package:bijou_cafe/home/user_orders.dart';
 import 'package:bijou_cafe/init/login/login_controller.dart';
 import 'package:bijou_cafe/models/order_model.dart';
 import 'package:bijou_cafe/models/user_model.dart';
+import 'package:bijou_cafe/utils/notifications.dart';
 import 'package:flutter/material.dart';
 import 'package:bijou_cafe/models/category_model.dart';
 import 'package:bijou_cafe/models/product_model.dart';
@@ -21,6 +23,7 @@ class HomeUserScreen extends StatefulWidget {
 }
 
 class HomeUserScreenState extends State<HomeUserScreen> {
+  final UserModel? loggedInUser = UserSingleton().user;
   late Future<List<ProductModel>?> productsFuture;
   late Future<List<CategoryModel>?> categoryFuture;
   FirestoreDatabase firestore = FirestoreDatabase();
@@ -37,6 +40,23 @@ class HomeUserScreenState extends State<HomeUserScreen> {
     productsFuture = firestore.getAllProducts();
     categoryFuture = firestore.getAllCategories();
     CartSingleton().setCartUpdatedCallback(updateCartCount);
+
+    Notifications notifications = Notifications();
+    notifications.listenToUserNotif(loggedInUser!.uid);
+    notifications.newStatusStream.listen((data) {
+      if (bool.parse(data['notify'].toString()) &&
+          loggedInUser!.userType != "admin") {
+        AwesomeNotifications().createNotification(
+          content: NotificationContent(
+            id: 1,
+            channelKey: "basic_channel",
+            title: "Your Order Was Updated",
+            body:
+                "Hi  ${loggedInUser!.firstName}! Your order has been updated to ${data['process'].toString().toUpperCase()}",
+          ),
+        );
+      }
+    });
   }
 
   Future<void> _refreshData() async {
