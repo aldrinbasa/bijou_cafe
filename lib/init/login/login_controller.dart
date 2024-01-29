@@ -65,7 +65,8 @@ class LoginController {
               userType: userInfo['userType'],
               creditBalance:
                   double.parse(userInfo['credit-balance'].toString()),
-              paypalBalance: double.parse(userInfo['paypal-balance']));
+              paypalBalance:
+                  double.parse(userInfo['paypal-balance'].toString()));
 
           setUser(loggedInUser, context);
         }
