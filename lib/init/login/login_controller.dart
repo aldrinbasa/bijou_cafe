@@ -63,8 +63,9 @@ class LoginController {
               firstName: userInfo!['firstName'],
               lastName: userInfo['lastName'],
               userType: userInfo['userType'],
-              creditBalance: userInfo['credit-balance'],
-              paypalBalance: userInfo['paypal-balance']);
+              creditBalance:
+                  double.parse(userInfo['credit-balance'].toString()),
+              paypalBalance: double.parse(userInfo['paypal-balance']));
 
           setUser(loggedInUser, context);
         }
@@ -98,8 +99,8 @@ class LoginController {
             firstName: firstName,
             lastName: lastName,
             userType: 'user',
-            creditBalance: 1000,
-            paypalBalance: 1000);
+            creditBalance: 999.99,
+            paypalBalance: 999.99);
 
         firestoreDatabase.createNewUser(newUser);
       }
@@ -138,8 +139,8 @@ class LoginController {
             firstName: userInfo!['firstName'],
             lastName: userInfo['lastName'],
             userType: userInfo['userType'],
-            creditBalance: userInfo['credit-balance'],
-            paypalBalance: userInfo['paypal-balance'],
+            creditBalance: double.parse(userInfo['credit-balance'].toString()),
+            paypalBalance: double.parse(userInfo['paypal-balance'].toString()),
           );
 
           setUser(loggedInUser, context);
