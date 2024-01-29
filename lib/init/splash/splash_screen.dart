@@ -88,16 +88,19 @@ void checkLoggedInStatus(BuildContext context) async {
   String? userLastName = prefs.getString('user_last_name');
   String? userType = prefs.getString('user_type');
   String? userUid = prefs.getString('user_uid');
+  double? userCreditBalance = prefs.getDouble('user_credit');
+  double? userPaypalBalance = prefs.getDouble('user_paypal');
 
   if (userEmail != null && userFirstName != null && userLastName != null) {
     LoginController loginController = LoginController();
     UserModel loggedInUser = UserModel(
-      uid: userUid!,
-      email: userEmail,
-      firstName: userFirstName,
-      lastName: userLastName,
-      userType: userType!,
-    );
+        uid: userUid!,
+        email: userEmail,
+        firstName: userFirstName,
+        lastName: userLastName,
+        userType: userType!,
+        creditBalance: userCreditBalance!,
+        paypalBalance: userPaypalBalance!);
 
     // ignore: use_build_context_synchronously
     loginController.setUser(loggedInUser, context);

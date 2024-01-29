@@ -58,12 +58,13 @@ class LoginController {
           final userInfo = await firestoreDatabase.getUserInfoByUUID(user.uid);
 
           UserModel loggedInUser = UserModel(
-            uid: user.uid,
-            email: user.email!,
-            firstName: userInfo!['firstName'],
-            lastName: userInfo['lastName'],
-            userType: userInfo['userType'],
-          );
+              uid: user.uid,
+              email: user.email!,
+              firstName: userInfo!['firstName'],
+              lastName: userInfo['lastName'],
+              userType: userInfo['userType'],
+              creditBalance: userInfo['credit-balance'],
+              paypalBalance: userInfo['paypal-balance']);
 
           setUser(loggedInUser, context);
         }
@@ -96,7 +97,9 @@ class LoginController {
             email: email,
             firstName: firstName,
             lastName: lastName,
-            userType: 'user');
+            userType: 'user',
+            creditBalance: 1000,
+            paypalBalance: 1000);
 
         firestoreDatabase.createNewUser(newUser);
       }
@@ -135,6 +138,8 @@ class LoginController {
             firstName: userInfo!['firstName'],
             lastName: userInfo['lastName'],
             userType: userInfo['userType'],
+            creditBalance: userInfo['credit-balance'],
+            paypalBalance: userInfo['paypal-balance'],
           );
 
           setUser(loggedInUser, context);
@@ -172,6 +177,8 @@ class LoginController {
     prefs.remove('user_last_name');
     prefs.remove('user_type');
     prefs.remove('user_uid');
+    prefs.remove('user_credit');
+    prefs.remove('user_paypal');
   }
 
   void saveUserDetailsToSharedPreferences(UserModel user) async {
@@ -181,5 +188,7 @@ class LoginController {
     prefs.setString('user_last_name', user.lastName);
     prefs.setString('user_type', user.userType);
     prefs.setString('user_uid', user.uid);
+    prefs.setDouble('user_credit', user.creditBalance);
+    prefs.setDouble('user_paypal', user.paypalBalance);
   }
 }

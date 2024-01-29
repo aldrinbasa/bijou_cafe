@@ -183,7 +183,7 @@ class CartDetailsWidgetState extends State<CartDetailsWidget> {
                     ),
                     RadioListTile<String>(
                       title: const Text('Paypal'),
-                      value: 'PaypalR',
+                      value: 'Paypal',
                       groupValue: paymentChoice,
                       onChanged: (value) {
                         setState(() {

@@ -1,5 +1,7 @@
 import 'package:bijou_cafe/constants/colors.dart';
 import 'package:bijou_cafe/constants/texts.dart';
+import 'package:bijou_cafe/home/credit_checkout.dart';
+import 'package:bijou_cafe/home/paypal_checkout.dart';
 import 'package:bijou_cafe/models/online_order_model.dart';
 import 'package:bijou_cafe/models/user_model.dart';
 import 'package:bijou_cafe/utils/firestore_database.dart';
@@ -225,218 +227,244 @@ class _OrderCardState extends State<OrderCard> {
     }
   }
 
+  void processPaymentUpdate() {
+    TextEditingController referenceIdController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Enter Reference ID"),
+          content: TextFormField(
+            controller: referenceIdController,
+            decoration: const InputDecoration(
+              labelText: "Reference ID",
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text("Cancel"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text("Save"),
+              onPressed: () {
+                String referenceId = referenceIdController.text;
+
+                firestore.updatePayment(
+                    widget.order.orderId, 'paid', referenceId);
+
+                Navigator.of(context).pop();
+                widget.onRefresh();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    void processPaymentUpdate() {
-      TextEditingController referenceIdController = TextEditingController();
-
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: const Text("Enter Reference ID"),
-            content: TextFormField(
-              controller: referenceIdController,
-              decoration: const InputDecoration(
-                labelText: "Reference ID",
-              ),
-            ),
-            actions: <Widget>[
-              TextButton(
-                child: const Text("Cancel"),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              ),
-              TextButton(
-                child: const Text("Save"),
-                onPressed: () {
-                  String referenceId = referenceIdController.text;
-
-                  firestore.updatePayment(
-                      widget.order.orderId, 'paid', referenceId);
-
-                  Navigator.of(context).pop();
-                  widget.onRefresh();
-                },
-              ),
-            ],
-          );
-        },
-      );
-    }
-
     return Card(
       elevation: 4,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.grey[900],
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Order ID: ${widget.order.orderId}',
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
-            Text(
-              DateFormat("MMM d, y (h:mm a)").format(widget.order.dateOrdered),
-              style: const TextStyle(
-                fontSize: 16,
-                color: Colors.white,
-              ),
-            ),
-            const SizedBox(
-              height: 16,
-            ),
-            const Text(
-              'Delivery Address:',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
-            Text(
-              widget.order.address,
-              style: const TextStyle(fontSize: 16, color: Colors.white),
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              'Phone Number:',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
-            Text(
-              widget.order.phoneNumber,
-              style: const TextStyle(fontSize: 16, color: Colors.white),
-            ),
-            const SizedBox(
-              height: 16,
-            ),
-            Text(
-              'Delivery Charge: ₱${widget.order.deliveryCharge.toStringAsFixed(2)}',
-              style: const TextStyle(fontSize: 16, color: Colors.white),
-            ),
-            Text(
-              'Orders: ₱${widget.order.totalPrice.toStringAsFixed(2)}',
-              style: const TextStyle(fontSize: 16, color: Colors.white),
-            ),
-            Text(
-              'Total: ₱${(widget.order.totalPrice + widget.order.deliveryCharge).toStringAsFixed(2)}',
-              style: const TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.amber,
-              ),
-            ),
-            Row(
-              children: [
-                Text(
-                  widget.order.payment.paymentMethod,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
+      child: GestureDetector(
+        onTap: () {
+          if (widget.order.payment.paymentMethod.toLowerCase() == 'paypal' &&
+              widget.order.status.toLowerCase() == 'accepted') {
+            showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return PayPalCheckoutDialog(
+                  order: widget.order,
+                );
+              },
+            );
+          } else if (widget.order.payment.paymentMethod.toLowerCase() ==
+                  'creditcard' &&
+              widget.order.status.toLowerCase() == 'accepted') {
+            showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return CrediCheckoutDialog(
+                  order: widget.order,
+                );
+              },
+            );
+          }
+        },
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.grey[900],
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Order ID: ${widget.order.orderId}',
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
                 ),
-                const SizedBox(
-                  width: 10,
+              ),
+              Text(
+                DateFormat("MMM d, y (h:mm a)")
+                    .format(widget.order.dateOrdered),
+                style: const TextStyle(
+                  fontSize: 16,
+                  color: Colors.white,
                 ),
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                  decoration: BoxDecoration(
-                    gradient: getStatusGradient(widget.order.payment.status),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Text(
-                    widget.order.payment.status.toUpperCase(),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'Delivery Address:',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+              Text(
+                widget.order.address,
+                style: const TextStyle(fontSize: 16, color: Colors.white),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Phone Number:',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+              Text(
+                widget.order.phoneNumber,
+                style: const TextStyle(fontSize: 16, color: Colors.white),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Delivery Charge: ₱${widget.order.deliveryCharge.toStringAsFixed(2)}',
+                style: const TextStyle(fontSize: 16, color: Colors.white),
+              ),
+              Text(
+                'Orders: ₱${widget.order.totalPrice.toStringAsFixed(2)}',
+                style: const TextStyle(fontSize: 16, color: Colors.white),
+              ),
+              Text(
+                'Total: ₱${(widget.order.totalPrice + widget.order.deliveryCharge).toStringAsFixed(2)}',
+                style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.amber,
+                ),
+              ),
+              Row(
+                children: [
+                  Text(
+                    widget.order.payment.paymentMethod,
                     style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
                       color: Colors.white,
                     ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            (widget.order.status == 'accepted' &&
-                    widget.order.payment.status == 'pending' &&
-                    widget.order.payment.paymentMethod == 'GCash')
-                ? Column(
-                    children: [
-                      TextButton(
-                        onPressed: () {
-                          processPaymentUpdate();
-                        },
-                        child: const Text(
-                          "Your order has been accepted! Kindly pay the total through GCash and provide the reference number.",
-                          style: TextStyle(
-                              color: secondaryColor,
-                              fontWeight: FontWeight.bold),
-                        ),
+                  const SizedBox(width: 10),
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                    decoration: BoxDecoration(
+                      gradient: getStatusGradient(widget.order.payment.status),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Text(
+                      widget.order.payment.status.toUpperCase(),
+                      style: const TextStyle(
+                        color: Colors.white,
                       ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Text(
-                            gCashNumber,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              (widget.order.status == 'accepted' &&
+                      widget.order.payment.status == 'pending' &&
+                      widget.order.payment.paymentMethod == 'GCash')
+                  ? Column(
+                      children: [
+                        TextButton(
+                          onPressed: () {
+                            processPaymentUpdate();
+                          },
+                          child: const Text(
+                            "Your order has been accepted! Kindly pay the total through GCash and provide the reference number.",
                             style: TextStyle(
+                              color: secondaryColor,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Text(
+                              gCashNumber,
+                              style: TextStyle(
                                 color: secondaryColor,
                                 fontWeight: FontWeight.bold,
-                                fontSize: 26),
-                          ),
-                          IconButton(
-                            icon: const Icon(
-                              Icons.copy,
-                              color: secondaryColor,
+                                fontSize: 26,
+                              ),
                             ),
-                            onPressed: () {
-                              Clipboard.setData(
-                                const ClipboardData(text: gCashNumber),
-                              );
-                              Toast.show(
-                                  context, '$gCashNumber copied to clipboard.');
-                            },
-                          ),
-                        ],
-                      )
-                    ],
-                  )
-                : const SizedBox.shrink(),
-            const SizedBox(height: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 7),
-              height: 40,
-              constraints: const BoxConstraints(minWidth: 800.0),
-              decoration: BoxDecoration(
-                gradient: getStatusGradient(widget.order.status),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Center(
-                child: Text(
-                  'Order: ${widget.order.status.toUpperCase()}',
-                  style: const TextStyle(
-                    fontSize: 18,
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
+                            IconButton(
+                              icon: const Icon(
+                                Icons.copy,
+                                color: secondaryColor,
+                              ),
+                              onPressed: () {
+                                Clipboard.setData(
+                                  const ClipboardData(text: gCashNumber),
+                                );
+                                Toast.show(
+                                  context,
+                                  '$gCashNumber copied to clipboard.',
+                                );
+                              },
+                            ),
+                          ],
+                        )
+                      ],
+                    )
+                  : const SizedBox.shrink(),
+              const SizedBox(height: 8),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 15, vertical: 7),
+                height: 40,
+                constraints: const BoxConstraints(minWidth: 800.0),
+                decoration: BoxDecoration(
+                  gradient: getStatusGradient(widget.order.status),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Center(
+                  child: Text(
+                    'Order: ${widget.order.status.toUpperCase()}',
+                    style: const TextStyle(
+                      fontSize: 18,
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

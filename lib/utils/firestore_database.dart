@@ -429,4 +429,19 @@ class FirestoreDatabase {
       return;
     }
   }
+
+  Future<void> updateCredit(String uid, double newCredit, String type) async {
+    try {
+      CollectionReference userCollection =
+          FirebaseFirestore.instance.collection(_userCollection);
+
+      if (type.toLowerCase() == "credit-card") {
+        await userCollection.doc(uid).update({'credit-balance': newCredit});
+      } else if (type.toLowerCase() == "paypal") {
+        await userCollection.doc(uid).update({'paypal-balance': newCredit});
+      }
+    } catch (e) {
+      return;
+    }
+  }
 }
